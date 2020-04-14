@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/cloud.jpg?v=5.1.4" color="#222">
+
+
+  <link rel="manifest" href="/images/manifest.json">
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams 摘要： 聚类和半监督学习的ADS框架解决KPI异常检测中选择算法、调参及新异常标记问题。 70个历史KPI指标的5个聚类质心标签在81个新KPI指标上实验，F-score 0.92 等同于最先进的监督方法，比最先进的非监">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams">
+<meta property="og:url" content="http://yoursite.com/2020/04/11/Rapid%20Deployment%20of%20Anomaly%20Detection%20Models%20for%20Large%20Number%20of%20Emerging%20KPI%20Streams/index.html">
+<meta property="og:site_name" content="avocador&#39;s blog">
+<meta property="og:description" content="Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams 摘要： 聚类和半监督学习的ADS框架解决KPI异常检测中选择算法、调参及新异常标记问题。 70个历史KPI指标的5个聚类质心标签在81个新KPI指标上实验，F-score 0.92 等同于最先进的监督方法，比最先进的非监">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1586616099/blog/mmexport1586615945331_frimex.png">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1586616063/blog/mmexport1586615940786_tymtkj.png">
+<meta property="article:published_time" content="2020-04-11T14:00:26.077Z">
+<meta property="article:modified_time" content="2020-04-11T14:47:04.582Z">
+<meta property="article:author" content="avocador">
+<meta property="article:tag" content="����ѧϰ">
+<meta property="article:tag" content="���Ļ���">
+<meta property="article:tag" content="����ʼ�">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/avocador/image/upload/v1586616099/blog/mmexport1586615945331_frimex.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/04/11/Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams/"/>
+
+
+
+
+
+  <title>Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams | avocador's blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">avocador's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/11/Rapid%20Deployment%20of%20Anomaly%20Detection%20Models%20for%20Large%20Number%20of%20Emerging%20KPI%20Streams/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="avocador">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="avocador's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-11T22:00:26+08:00">
+                2020-04-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="rapid-deployment-of-anomaly-detection-models-for-large-number-of-emerging-kpi-streams">Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams</h1>
+<h2 id="摘要">摘要：</h2>
+<p><strong>聚类和半监督学习的ADS框架解决KPI异常检测中选择算法、调参及新异常标记问题。</strong></p>
+<p>70个历史KPI指标的5个聚类质心标签在81个新KPI指标上实验，F-score 0.92</p>
+<p>等同于最先进的监督方法，比最先进的非监督方法高出 61.4%</p>
+<h2 id="结论">结论</h2>
+<p><strong>半监督学习首次应用于KPI异常检测</strong></p>
+<p>监督方法：</p>
+<p>无监督方法：高出 Isolation Forest 360% ；Donut 61.4%（最先进）</p>
+<h2 id="q">Q</h2>
+<ol type="1">
+<li><p>聚类和半监督学习是如何搭配的？</p>
+<p>是将聚类结果交给半监督学习，还是将半监督学习结果聚类？</p></li>
+<li><p>ADS框架关于新KPI异常的问题</p>
+<p>对于新异常KPI是否有所限制，误判情况如何，主要是聚类在起作用还是半监督学习？</p></li>
+<li><p>在实验过程中是否需要存储历史KPI指标，还是只需要调用聚类中心标签？</p></li>
+<li><p>为什么ADS的F-score值如此之高，是否是数据过于理想，数据集是公开数据集吗？</p></li>
+<li><p>本文提及的监督方法和非监督方法是什么？</p></li>
+</ol>
+<h2 id="导言">导言</h2>
+<h3 id="现存问题">现存问题</h3>
+<ul>
+<li>异常检测算法/参数过时</li>
+</ul>
+<ol type="1">
+<li>新产品的频繁推出，出现新的KPI指标</li>
+<li>DevOps和微服务的普及，软件升级变得越来越频繁，KPI流的模式改变</li>
+</ol>
+<ul>
+<li>为了获得最佳的精度，操作者手动选择异常检测算法，并为每个关键KPI指标调整参数</li>
+<li>基于监督学习的方法，要求为每个新的KPI手动标记异常</li>
+<li>基于无监督学习的方法，不需要算法选择、参数调整或手动标记，但是要么精度低，要么需要大量的训练数据</li>
+</ul>
+<h3 id="ads框架">ADS框架</h3>
+<ul>
+<li><strong>思想（降维）</strong></li>
+</ul>
+<ol type="1">
+<li>许多KPI指标由于隐含的关联和相似性而相似，可以使用相似的异常检测算法和参数</li>
+<li>将KPI指标聚类成集群，集群的数量很大程度上由服务的性质和KPI的类型决定，而不是由整个系统的规模决定</li>
+</ol>
+<ul>
+<li><strong>方法</strong></li>
+</ul>
+<ol type="1">
+<li><p>现存/历史KPI聚类成簇</p></li>
+<li><p>手动标记所有簇质心的异常</p></li>
+<li><p>将新出现的KPI分配到现有的簇中</p></li>
+<li><p>结合新的KPI数据及其簇的质心，使用半监督学习训练新模型</p>
+<p>采用的是稳健的半监督学习模型——contrastive pessimistic likelihood estima-tion（CPLE）</p>
+<p>要求现有的KPI和新KPI之间有相似（不一定相同）的数据分布</p></li>
+</ol>
+<h3 id="其余部分">其余部分</h3>
+<ul>
+<li>第二节回顾背景，相关工作和动机</li>
+<li>第三介绍ADS的框架</li>
+<li>第四节评估ADS的实验结果</li>
+<li>第五节给出本文的结论</li>
+</ul>
+<h2 id="背景">背景</h2>
+<h3 id="kpi的异常检测">KPI的异常检测</h3>
+<ul>
+<li><strong>KPI数据及异常类型</strong></li>
+</ul>
+<p>KPI为时间序列数据，格式为（时间戳，数值） <span class="math display">\[
+x_{t-m+1},\cdots,x_t \\
+x_i为数值,i\in [t-m+1,t],m为KPI流长度
+\]</span> <img src="https://res.cloudinary.com/avocador/image/upload/v1586616099/blog/mmexport1586615945331_frimex.png" /></p>
+<p>A为峰值异常，B为水平移动异常，C为最小值异常（$ y_t =1表示异常数据点，y_t=0表示正常数据点 $）</p>
+<ul>
+<li><strong>传统方法</strong></li>
+</ul>
+<ol type="1">
+<li>计算数据点的异常得分，以表示该数据点异常的可能性</li>
+<li>设置阈值来确定每个数据点是否异常</li>
+</ol>
+<ul>
+<li><p><strong>评估指标</strong></p>
+<p>异常检测本质为两分类问题，直观分类度量为精确度，召回率和F-score</p></li>
+</ul>
+<h3 id="kpi异常检测方法">KPI异常检测方法</h3>
+<ul>
+<li><strong>传统方法</strong></li>
+</ul>
+<ol type="1">
+<li>奇异值分解</li>
+<li>小波法</li>
+<li>ARIMA</li>
+<li>时间序列分解</li>
+<li>Holt-Winters</li>
+</ol>
+<p>为了获得最佳精度需要手动选择异常检测算法并为每个KPI指标调整其参数</p>
+<p>大量新出现的KPI必须仔细监控</p>
+<ul>
+<li><strong>监督学习方法</strong></li>
+</ul>
+<ol type="1">
+<li>EGADS</li>
+<li>Oppertinice</li>
+</ol>
+<p>从手动标记的异常中学习算法选择和参数调整</p>
+<ul>
+<li><strong>无监督学习方法</strong></li>
+</ul>
+<ol type="1">
+<li>isolation based methods</li>
+<li>variational autoencoders（VAE）</li>
+</ol>
+<p>精度低，需要大量的数据</p>
+<h3 id="kpi聚类">KPI聚类</h3>
+<p>传统时间序列聚类方法都是为平滑和理想化的数据设计的，不适合KPI数据的形状</p>
+<p>本文采用聚类方法为<strong>ROCKA</strong>，一种基于KPI流形状的快速聚类方法</p>
+<ul>
+<li>使用移动平均法提取基线，减少噪声和异常的偏差</li>
+<li>使用基于形状的距离作为距离度量，通过快速傅里叶变换将算法复杂度降低为$ O(nlog(n)) $</li>
+<li>使用DBSCAN对KPI流进行聚类（基于密度的聚类算法）</li>
+</ul>
+<h2 id="ads框架-1">ADS框架</h2>
+<ol type="1">
+<li>对数据进行填充缺失值和标准化的预处理</li>
+<li>使用ROCKA对KPI进行聚类，提取聚类中心特征</li>
+<li>对新KPI进行同样的预处理并分类到上述聚类之一</li>
+<li>基于新KPI的特征，新KPI聚类中心的特征和标签，使用CPLE算法训练半监督模型</li>
+<li>基于上述模型和严重性阈值检测新KPI异常</li>
+</ol>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1586616063/blog/mmexport1586615940786_tymtkj.png" /></p>
+<h3 id="预处理和聚类">预处理和聚类</h3>
+<ul>
+<li><strong>线性插值填充缺失值</strong>，监控系统故障和操作人员配置错误都会导致缺失值的产生</li>
+<li><strong>标准化</strong>，使得不同幅度和长度尺度的KPI具有可比性，根据形状而不是绝对数值进行聚类</li>
+<li><strong>ROCKA进行聚类</strong>，并获得每个聚类中心的特征</li>
+</ul>
+<h3 id="特征提取">特征提取</h3>
+<p>使用不同异常检测器的输出结果（异常严重性）作为特征，每个检测器都可以作为特征提取器</p>
+<p>大多数异常检测器是参数化的，ADS需要确定其参数</p>
+<p>由于ADS中特征提取、训练和分类（检测）都是为处理单个数据点而设计的，而不是异常窗口，因此半监督学习算法可以有足够的数据进行训练，分类器也可以快速检测每个数据点上的异常。</p>
+<p><strong>ADS使用了14种检测器，117种配置进行特征提取</strong></p>
+<h3 id="半监督学习">半监督学习</h3>
+<p>基于自训练的方法将现有模型应用于“标记”未标记的数据，并将新标记的数据与实际的标记数据一起重新训练模型，直到预测结果不再改变或迭代结束</p>
+<p>不同的半监督学习模型有不同的优点和缺点</p>
+<p>自我训练的拓展模型——CPLE，适用于任何监督学习分类器的弹性半监督学习框架，包括随机森林、SVM、决策树等。将基本模型的预测概率作为输入，充分利用未标记数据</p>
+<ul>
+<li>CPLE的优点</li>
+</ul>
+<ol type="1">
+<li>可以更灵活地更改基础模型</li>
+<li>需要较低的内存复杂度，相较于图模型$ O(n^2) $</li>
+<li>不需要强大的假设</li>
+<li>支持增量学习</li>
+</ol>
+<p><strong>ADS使用随即森林作为基础模型的CPLE进行半监督学习</strong></p>
+<h2 id="评估">评估</h2>
+<h3 id="数据集">数据集</h3>
+<p>成功率、在线播放器的数量和延迟的<strong>70个被标记的历史KPI，81个未被标记的新KPI</strong>，仅介绍81个新KPI的数量、采样间隔和时间长度、平均异常点数量及百分比（65个未被标记的历史KPI未被考虑，每十天产生超过6000个新的KPI，我们仅随机选择了151个KPI用作评估）</p>
+<p><strong>ROCKA的聚类结果和分类结果与手动分组完全一致</strong></p>
+<h3 id="评估指标">评估指标</h3>
+<p>精确度、召回率、F-score和best F-score</p>
+<p><strong>将best F-score作为评估指标</strong></p>
+<h3 id="整体性能评估">整体性能评估</h3>
+<p><strong>使用best F-score评估ADS、iForeset、Donut、Oppertice和Rocka及Oppertine的组合的最佳性能</strong></p>
+<p>对于81个新KPI种每一个，都使用前60%提取的特征以及其聚类中心的特征和手动标签来训练上述模型，用训练好的模型检测81个新KPI后40%的异常</p>
+<ul>
+<li>ADS优于iForest和Donut的原因</li>
+</ul>
+<ol type="1">
+<li>iForest未使用标签，对噪声敏感</li>
+<li>Donut是深度贝叶斯模型，需要大量的训练数据</li>
+</ol>
+<p>Oppertice的性能与ADS相似，但由于是监督学习方法，需要大量的标注工作。ADS仅使用了5个被标记的聚类中心来训练，而Oppertice使用了全部81个标记的KPI来训练</p>
+<p>ROCKA及Oppertice的组合仅基于聚类中心KPI，产生大量错误警报。ADS使用半监督学习有效地解决了上述问题，ADS不仅从聚类中心的标签中学习，而且从新KPI的波动程度中学习</p>
+<h2 id="q-a">Q &amp; A</h2>
+<ol type="1">
+<li><p>Q：聚类和半监督学习是如何搭配的？</p>
+<p>A：对历史KPI中聚类，并将新KPI分类，对聚类中心和新KPI分别提取特征，与聚类中心标签一起作为半监督学习的训练集</p></li>
+<li><p>Q：ADS框架关于新KPI异常的问题</p>
+<p>A：本文KPI为随机选择，但满足的假设为相似的KPI波形相同。与监督学习效果相同。根据ADS、iForest、Donut和ROCKA及Opprentice的比较可知，聚类部分作用很大。个人猜想原因如下：聚类过程数据为标注数据，而相似KPI波形相似，可能这里就是ADS与无监督学习效果拉开的地方</p></li>
+<li><p>Q：在实验过程中是否需要存储历史KPI指标，还是只需要调用聚类中心标签？</p>
+<p>A：未使用具体的历史KPI指标，不仅使用聚类中心的标签，还对聚类中心进行了特征提取</p></li>
+<li><p>Q：为什么ADS的F-score值如此之高，是否是数据过于理想，数据集是公开数据集吗？</p>
+<p>A：使用的KPI虽然是随机选择的，但有一定的假设条件，此方法在迁移的时候需要对KPI数据进行分析是否满足条件，本文提供数据信息过少</p></li>
+<li><p>Q：本文提及的监督方法和非监督方法是什么？</p>
+<p>A：文中提及的最先进的监督方法为Opprentice，提及的非监督方法为iForest和Donut，效果都比较差，跟数据采样有关系</p></li>
+</ol>
+<h2 id="关键词">关键词</h2>
+<p><strong>KPI异常检测</strong>、<strong>聚类+半监督方法ADS</strong>、<strong>ROCKA</strong>、<strong>基于随机森林的CPLE</strong>、<strong>Opprentice</strong>、<strong>iForest</strong>、<strong>Donut</strong></p>
+<h2 id="总结">总结</h2>
+<p><strong>将历史KPI通过ROCKA聚类，将新KPI进行分类，将聚类中心的特征和标签及新KPI的特征作为测试集训练CPLE模型（半监督方法）用于新KPI的异常检测</strong></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/09/%E6%9C%80%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/" rel="next" title="最优化方法">
+                <i class="fa fa-chevron-left"></i> 最优化方法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="avocador" />
+            
+              <p class="site-author-name" itemprop="name">avocador</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Avocador" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1666752748@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#rapid-deployment-of-anomaly-detection-models-for-large-number-of-emerging-kpi-streams"><span class="nav-number">1.</span> <span class="nav-text">Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.1.</span> <span class="nav-text">摘要：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论"><span class="nav-number">1.2.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#q"><span class="nav-number">1.3.</span> <span class="nav-text">Q</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#导言"><span class="nav-number">1.4.</span> <span class="nav-text">导言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#现存问题"><span class="nav-number">1.4.1.</span> <span class="nav-text">现存问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ads框架"><span class="nav-number">1.4.2.</span> <span class="nav-text">ADS框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其余部分"><span class="nav-number">1.4.3.</span> <span class="nav-text">其余部分</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.5.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kpi的异常检测"><span class="nav-number">1.5.1.</span> <span class="nav-text">KPI的异常检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kpi异常检测方法"><span class="nav-number">1.5.2.</span> <span class="nav-text">KPI异常检测方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kpi聚类"><span class="nav-number">1.5.3.</span> <span class="nav-text">KPI聚类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ads框架-1"><span class="nav-number">1.6.</span> <span class="nav-text">ADS框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#预处理和聚类"><span class="nav-number">1.6.1.</span> <span class="nav-text">预处理和聚类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特征提取"><span class="nav-number">1.6.2.</span> <span class="nav-text">特征提取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#半监督学习"><span class="nav-number">1.6.3.</span> <span class="nav-text">半监督学习</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#评估"><span class="nav-number">1.7.</span> <span class="nav-text">评估</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据集"><span class="nav-number">1.7.1.</span> <span class="nav-text">数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#评估指标"><span class="nav-number">1.7.2.</span> <span class="nav-text">评估指标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#整体性能评估"><span class="nav-number">1.7.3.</span> <span class="nav-text">整体性能评估</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#q-a"><span class="nav-number">1.8.</span> <span class="nav-text">Q &amp; A</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关键词"><span class="nav-number">1.9.</span> <span class="nav-text">关键词</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.10.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">avocador</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
