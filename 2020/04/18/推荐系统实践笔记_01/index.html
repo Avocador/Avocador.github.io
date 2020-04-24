@@ -81,20 +81,24 @@
 
 
 
-<meta name="description" content="最优化方法 目标  认识&#x2F;表达某类问题为凸优化问题 编程解决一定规模的问题 优化解分析 得到的解是否为唯一的优化解；离优化解的距离；方法的上限；  内容  凸集，凸函数，优化问题 例子，应用 算法  介绍  数学表达优化问题 最小二乘和线性规划 凸优化 例子 非线性优化问题 凸优化的简史  数学中的优化问题 变量；目标函数；限制条件。 变量使得目标">
+<meta name="description" content="第一章 好的推荐系统 既然要谈论好的推荐系统，那么首先就要对推荐系统有所认识。推荐系统往往会跟搜索引擎进行对比，文中指出，推荐系统应该是在用户没有明确目的的情况下发挥作用。这个观点可能放在今天来看就有些狭义了，推荐行为首先就是要明确用户的需求，有时候不推荐也是推荐系统分析后的结果。这说明，推荐系统的评价标准往往不是在选择算法时确定的，而应该在明确客户需求时就确定下来并会对选择算法产生影响。（很不">
 <meta property="og:type" content="article">
-<meta property="og:title" content="最优化方法">
-<meta property="og:url" content="http://yoursite.com/2020/04/09/%E6%9C%80%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:title" content="推荐系统实践笔记_01">
+<meta property="og:url" content="http://yoursite.com/2020/04/18/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0_01/index.html">
 <meta property="og:site_name" content="avocador&#39;s blog">
-<meta property="og:description" content="最优化方法 目标  认识&#x2F;表达某类问题为凸优化问题 编程解决一定规模的问题 优化解分析 得到的解是否为唯一的优化解；离优化解的距离；方法的上限；  内容  凸集，凸函数，优化问题 例子，应用 算法  介绍  数学表达优化问题 最小二乘和线性规划 凸优化 例子 非线性优化问题 凸优化的简史  数学中的优化问题 变量；目标函数；限制条件。 变量使得目标">
+<meta property="og:description" content="第一章 好的推荐系统 既然要谈论好的推荐系统，那么首先就要对推荐系统有所认识。推荐系统往往会跟搜索引擎进行对比，文中指出，推荐系统应该是在用户没有明确目的的情况下发挥作用。这个观点可能放在今天来看就有些狭义了，推荐行为首先就是要明确用户的需求，有时候不推荐也是推荐系统分析后的结果。这说明，推荐系统的评价标准往往不是在选择算法时确定的，而应该在明确客户需求时就确定下来并会对选择算法产生影响。（很不">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-04-09T14:01:55.312Z">
-<meta property="article:modified_time" content="2020-04-07T16:00:52.070Z">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1587094350/Notes/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5/%E5%A5%BD%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F_1_q0drbd.png">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1587094341/Notes/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5/%E5%A5%BD%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F_2_vprem7.png">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1587094341/Notes/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5/%E5%A5%BD%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F_3_ekokau.png">
+<meta property="article:published_time" content="2020-04-18T10:49:36.882Z">
+<meta property="article:modified_time" content="2020-04-18T10:49:36.882Z">
 <meta property="article:author" content="avocador">
 <meta property="article:tag" content="����ѧϰ">
 <meta property="article:tag" content="���Ļ���">
 <meta property="article:tag" content="����ʼ�">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/avocador/image/upload/v1587094350/Notes/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5/%E5%A5%BD%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F_1_q0drbd.png">
 
 
 
@@ -124,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/04/09/最优化方法/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/04/18/推荐系统实践笔记_01/"/>
 
 
 
 
 
-  <title>最优化方法 | avocador's blog</title>
+  <title>推荐系统实践笔记_01 | avocador's blog</title>
   
 
 
@@ -247,7 +251,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/09/%E6%9C%80%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/18/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0_01/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="avocador">
@@ -264,7 +268,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">最优化方法</h1>
+          <h1 class="post-title" itemprop="name headline">推荐系统实践笔记_01</h1>
         
 
         <div class="post-meta">
@@ -276,8 +280,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-09T22:01:55+08:00">
-                2020-04-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-18T18:49:36+08:00">
+                2020-04-18
               </time>
             
 
@@ -286,6 +290,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Notes/" itemprop="url" rel="index">
+                    <span itemprop="name">Notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -314,87 +340,38 @@
       
 
       
-        <h1 id="最优化方法">最优化方法</h1>
-<h2 id="目标">目标</h2>
-<ol type="1">
-<li><p>认识/表达某类问题为凸优化问题</p></li>
-<li><p>编程解决一定规模的问题</p></li>
-<li><p>优化解分析</p>
-<p>得到的解是否为唯一的优化解；离优化解的距离；方法的上限；</p></li>
-</ol>
-<h2 id="内容">内容</h2>
-<ol type="1">
-<li>凸集，凸函数，优化问题</li>
-<li>例子，应用</li>
-<li>算法</li>
-</ol>
-<h2 id="介绍">介绍</h2>
-<ol type="1">
-<li>数学表达优化问题</li>
-<li>最小二乘和线性规划</li>
-<li>凸优化</li>
-<li>例子</li>
-<li>非线性优化问题</li>
-<li>凸优化的简史</li>
-</ol>
-<h3 id="数学中的优化问题">数学中的优化问题</h3>
-<p>变量；目标函数；限制条件。</p>
-<p>变量使得目标函数最小且满足限制条件。</p>
+        <h1 id="第一章-好的推荐系统">第一章 好的推荐系统</h1>
+<p>既然要谈论好的推荐系统，那么首先就要对推荐系统有所认识。推荐系统往往会跟搜索引擎进行对比，文中指出，推荐系统应该是在用户没有明确目的的情况下发挥作用。这个观点可能放在今天来看就有些狭义了，推荐行为首先就是要明确用户的需求，有时候不推荐也是推荐系统分析后的结果。这说明，推荐系统的评价标准往往不是在选择算法时确定的，而应该在明确客户需求时就确定下来并会对选择算法产生影响。（很不幸的是，推荐系统的滥用在很大程度上影响到我海淘的乐趣，归根结底，这应当视作评价标准选择的失败）</p>
+<p>文章认为推荐系统的作用是发掘长尾效应下尾部物品的潜力，即便现在谈及推荐系统最先想到的不是购物app而是抖音快手，但这个观点我认为依旧成立。前面我个人的总结并非准确，“发掘长尾效应下尾部物品的潜力”应改为“发现长尾效应尾部有潜力的物品”，有潜力即满足用户的个性化需求。该问题的二元为用户和物品，推荐算法的本质就是通过一定的方式将用户和物品联系起来。再次强调，一定要注意应用场景和明确客户需求。</p>
+<p>下面是我对文章提及的评测指标的一些看法：</p>
 <ul>
-<li><p>例子1——资产组合</p>
-<p>变量：每个资产上的投资额</p>
-<p>限制：预算，每个资产上投资上/下限，最小回报</p>
-<p>目标：最低风险</p></li>
-<li><p>例子2——设备尺寸设计</p>
-<p>变量：长，宽</p>
-<p>限制：工艺精度，工程时间，最大占用面积</p>
-<p>目标：功耗最小</p></li>
-<li><p>例子3——数据拟合</p>
-<p>变量：参数</p>
-<p>限制：参数范围，先验知识</p>
-<p>目标：拟合准确</p></li>
+<li>用户满意度：说是最重要有点naive，一个必须跟商业目标进行妥协的定性指标而已。</li>
+<li>预测准确度：本质为用户满意度的定量指标。</li>
+<li>覆盖度：整体推荐物品数量的指标，内容供应商会关心。</li>
+<li>多样性：本意为推荐物品类别数量的指标，但定量指标是物品相似度，使得概念跌落成了多样性。</li>
+<li>新颖性：用平均流行度衡量不准确，牺不牺牲精度看应用场景，不成熟，可被多样性和覆盖度替代。</li>
+<li>惊喜度：实质为用户满意度的组成部分之一，用来水论文的概念。</li>
+<li>信任度：与用户满意度、品牌建设等概念互相作用，PDD将是好例子。</li>
+<li>时效性：物品方面的重要指标，跟算法选择有关，也作用于物品冷启动。</li>
+<li>鲁棒性：算法、后端及运维踢皮球的战场。</li>
+<li>商业目标：一个建议跟用户满意度进行妥协的指标，参考百度。</li>
 </ul>
-<h3 id="解优化问题">解优化问题</h3>
-<p>一般优化问题：</p>
+<p>经过筛选，后面的梳理内容将会以预测准确度（用户维度）、多样性（物品维度）和时效性（时间维度）作为衡量推荐系统好坏的评测指标。</p>
+<p>在线实验的AB测试：控制变量法；双盲实验</p>
+<p>影响AB测试结果准确性的因素：</p>
 <ol type="1">
-<li>很难解</li>
-<li>长时间，解的最优性</li>
+<li>样本数量（小流量测试开始，逐步放大测试流量）</li>
+<li>样本质量（分流出的样本是否有效即控制变量是否有效，可使用AA测试）</li>
+<li>测试时间长短（兼顾用户的适应期和行为周期）</li>
+<li>多个实验并行的影响（通过实验分层处理）</li>
 </ol>
-<p>例外：</p>
-<ol type="1">
-<li>最小二乘</li>
-<li>线性规划</li>
-<li>凸问题（1、2为特殊情况的凸问题）</li>
-</ol>
-<h4 id="最小二乘">最小二乘</h4>
-<p><span class="math display">\[
-min||Ax-b||^2_2\\
-A\in R^{k\times n},k:样本数，n:特征数，x\in R^{n\times 1}变量，b\in R^{k\times 1}观测，A=(a_1,a_2,\cdots a_n)
-\]</span></p>
-<ul>
-<li>解析解：</li>
-</ul>
-<p><span class="math display">\[
-Ax=(a_1x_1+a_2x_2+\cdots +a_nx_n) \\
-由\lbrace a_i \rbrace^n_{i=1}张成空间中的一个向量，(x_1,x_2,\cdots ,x_n)为系数 \\
-目标即为b投影到A空间剩下的量最小，即b\bot Ax \\
-\left\{ 
-\begin{array}{c}
-a_1^T(Ax-b)=0 \\ 
-a_2^T(Ax-b)=0 \\ 
-\cdots \\
-a_n^T(Ax-b)=0
-\end{array}
-\right. \\
-即A^T(Ax-b)=0 \\
-A^TAx=A^Tb \\
-x=(A^TA)^{-1}A^Tb
-\]</span></p>
-<ul>
-<li><p>可靠有效的算法</p></li>
-<li><p>计算时间 $ n^2k $ $$</p>
-<p>$$</p></li>
-</ul>
+<hr />
+<p>AB测试流程</p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1587094350/Notes/推荐系统实践/好的推荐系统_1_q0drbd.png" /></p>
+<p>AA测试流程</p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1587094341/Notes/推荐系统实践/好的推荐系统_2_vprem7.png" /></p>
+<p>实验分层处理</p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1587094341/Notes/推荐系统实践/好的推荐系统_3_ekokau.png" /></p>
 
       
     </div>
@@ -419,14 +396,18 @@ x=(A^TA)^{-1}A^Tb
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2020/04/17/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0_00/" rel="next" title="推荐系统实践笔记_00">
+                <i class="fa fa-chevron-left"></i> 推荐系统实践笔记_00
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/04/17/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0_00/" rel="prev" title="推荐系统实践笔记_00">
-                推荐系统实践笔记_00 <i class="fa fa-chevron-right"></i>
+              <a href="/2020/04/24/ROCKA+CPLE/" rel="prev" title="Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams">
+                Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -570,7 +551,7 @@ x=(A^TA)^{-1}A^Tb
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#最优化方法"><span class="nav-number">1.</span> <span class="nav-text">最优化方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目标"><span class="nav-number">1.1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内容"><span class="nav-number">1.2.</span> <span class="nav-text">内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍"><span class="nav-number">1.3.</span> <span class="nav-text">介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数学中的优化问题"><span class="nav-number">1.3.1.</span> <span class="nav-text">数学中的优化问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解优化问题"><span class="nav-number">1.3.2.</span> <span class="nav-text">解优化问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#最小二乘"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">最小二乘</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#第一章-好的推荐系统"><span class="nav-number">1.</span> <span class="nav-text">第一章 好的推荐系统</span></a></li></ol></div>
             
 
           </div>

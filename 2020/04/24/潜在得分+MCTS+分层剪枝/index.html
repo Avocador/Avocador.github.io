@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/cloud.jpg?v=5.1.4" color="#222">
+
+
+  <link rel="manifest" href="/images/manifest.json">
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="摘要 清华 蒙特卡洛树搜索定位多维指标异常 关键KPIs的多维属性根因定位——多维属性值组合，本文使用KPI为页面浏览量（PV） 当前问题：  不同组合的PV是相互依存的——异常的根因使得其他PV在不同层次级别发生变化 多维属性空间组合可能太多  HotSpot：  针对问题1，通过基于涟漪效应的新潜在得分去揭示异常传播 针对问题2，采用蒙特卡洛树搜索（MCTS）和分层修剪策">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HotSpot Anomaly Localization for Additive KPIs With Multi-Dimensional Attributes">
+<meta property="og:url" content="http://yoursite.com/2020/04/24/%E6%BD%9C%E5%9C%A8%E5%BE%97%E5%88%86+MCTS+%E5%88%86%E5%B1%82%E5%89%AA%E6%9E%9D/index.html">
+<meta property="og:site_name" content="avocador&#39;s blog">
+<meta property="og:description" content="摘要 清华 蒙特卡洛树搜索定位多维指标异常 关键KPIs的多维属性根因定位——多维属性值组合，本文使用KPI为页面浏览量（PV） 当前问题：  不同组合的PV是相互依存的——异常的根因使得其他PV在不同层次级别发生变化 多维属性空间组合可能太多  HotSpot：  针对问题1，通过基于涟漪效应的新潜在得分去揭示异常传播 针对问题2，采用蒙特卡洛树搜索（MCTS）和分层修剪策">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-04-24T04:21:19.378Z">
+<meta property="article:modified_time" content="2020-04-24T04:21:19.379Z">
+<meta property="article:author" content="avocador">
+<meta property="article:tag" content="����ѧϰ">
+<meta property="article:tag" content="���Ļ���">
+<meta property="article:tag" content="����ʼ�">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/04/24/潜在得分+MCTS+分层剪枝/"/>
+
+
+
+
+
+  <title>HotSpot Anomaly Localization for Additive KPIs With Multi-Dimensional Attributes | avocador's blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">avocador's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/24/%E6%BD%9C%E5%9C%A8%E5%BE%97%E5%88%86+MCTS+%E5%88%86%E5%B1%82%E5%89%AA%E6%9E%9D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="avocador">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="avocador's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">HotSpot Anomaly Localization for Additive KPIs With Multi-Dimensional Attributes</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-24T12:21:19+08:00">
+                2020-04-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要">摘要</h2>
+<p>清华 蒙特卡洛树搜索定位多维指标异常</p>
+<p>关键KPIs的多维属性根因定位——多维属性值组合，本文使用KPI为页面浏览量（PV）</p>
+<p><strong>当前问题：</strong></p>
+<ol type="1">
+<li>不同组合的PV是相互依存的——异常的根因使得其他PV在不同层次级别发生变化</li>
+<li>多维属性空间组合可能太多</li>
+</ol>
+<p><strong>HotSpot：</strong></p>
+<ol type="1">
+<li>针对问题1，通过基于涟漪效应的新潜在得分去揭示异常传播</li>
+<li>针对问题2，采用蒙特卡洛树搜索（MCTS）和分层修剪策略</li>
+</ol>
+<p><strong>涟漪效应：</strong>描述事物造成的影响逐渐扩散的情形——由于一个模组修改，其他模组也要随之修改</p>
+<p><strong>模型效果：</strong>F-score超过90%的案例比例由现有方法的15%提升到95%，本地操作时间从手工一小时减少到20秒以下</p>
+<h2 id="结论">结论</h2>
+<p>多维属性KPI的异常定位视作巨大空间的搜索问题（a search problem with a huge space）</p>
+<p>HotSpot框架首次采用基于涟漪效应的新的潜在得分的MCTS方法，提出了一种分层修剪方法来减少搜索空间。提高了准确性，降低了本地手工工作时间</p>
+<h2 id="q">Q</h2>
+<ol type="1">
+<li>如何通过涟漪效应给出潜在得分？</li>
+<li>蒙特卡洛树是啥，是如何使用的？</li>
+<li>分层修剪的方法是原创吗？原理和实现过程如何？</li>
+<li>多为属性KPI异常定位的现有方法是什么？为何跟HotSpot框架的效果差距悬殊？</li>
+</ol>
+<p><strong>吐槽：</strong>异常检测这一块怎么都是在借鉴成熟的方案？</p>
+<h2 id="导言">导言</h2>
+<p><strong>问题存在的原因：</strong>KPI指标的可加性，细粒度属性组合成粗粒度KPI（异常表征）</p>
+<p><strong>现有方法：</strong>Adtributor，iDice；只能处理搜索空间小得多的案例</p>
+<p><strong>本文贡献：</strong></p>
+<ol type="1">
+<li>首次在异常根因定位中采用MCTS方法</li>
+<li>提出基于涟漪效应的新的潜在得分</li>
+<li>提出了类似于Apriori原理的分层修剪方法来减少搜索空间（父元素具有非常低的潜在得分，则每个子元素不太可能是根本原因）</li>
+<li>模型效果的提升</li>
+</ol>
+<p><strong>其余部分：</strong></p>
+<ul>
+<li>第二部分介绍异常问题</li>
+<li>第三部分介绍HotSpot的核心思想和概述</li>
+<li>第四部分介绍HotSpot的设计</li>
+<li>第五部分通过实验评估HotSpot的性能</li>
+<li>第六部分介绍HotSpot的操作经验</li>
+<li>第七八九部分分别介绍讨论、相关工作和结论</li>
+</ul>
+<h2 id="问题介绍">问题介绍</h2>
+<h3 id="概念">概念</h3>
+<ul>
+<li>Elements：最细粒度属性集合</li>
+</ul>
+<p><span class="math display">\[
+\begin{align}
+&amp; e=(p,i,d,c) \\
+&amp; e=(Province,ISP,Data\;Center,Channel) \\
+&amp; e=(地理区域，互联网服务供应商，服务请求的数据中心，频道) \\
+&amp; 引入*作通配符
+\end{align}
+\]</span></p>
+<ul>
+<li>PV Value：符合属性集合的PV个数</li>
+<li>Cuboids：长方体数据结构</li>
+</ul>
+<p><span class="math display">\[
+默认属性C作为区分立方体的标签 \\
+E(B_{p_0,i_0,d_0})=\lbrace e|e=(p_0,i_0,d_o) \rbrace \\
+其中p_0,i_0,d_0分别为属性p,i,d的取值，也可取为*通配符 \\
+集合中包含关系在此处被引申为父子关系 \\
+父长方体PV\,Value值为所有子长方体PV\,Value值之和
+\]</span></p>
+<p><strong>个人理解角度：</strong></p>
+<p>可以将Elements视作日志模板，而PV Value则可视作日志匹配数量</p>
+<p>长方体是一种抽象的三维数据结构。将Channel属性作为标签，Elements则降维成三维数组，可视化抽象为坐标系及立方块，每一立个方块对应一个具体的三维数组（不含通配符）。通配符在模板中描述包含关系，在坐标系中表示父子关系，含有一个通配符为线（平行坐标轴），两个通配符为面（垂直坐标轴），三个通配符为整个长方体。</p>
+<h3 id="问题">问题</h3>
+<p>异常定位问题被抽象成识别长方体及确定引起总体KPI值变化的长方体子集（1-d cuboids层级即可）</p>
+<h3 id="挑战">挑战</h3>
+<ol type="1">
+<li><p>如何设计函数衡量Elements的父长方体是否为异常根因</p>
+<p>首先确定覆盖总PV变化的元素集合，但无法判断是哪个1-d cuboids父长方体，需要引入已定义的潜在得分（ps）来判断根因所在</p></li>
+<li><p>Elements的排列组合且潜在得分（ps）的非可加性使得搜索空间太大，共$ 2^n - 1 $种情况。</p></li>
+</ol>
+<h2 id="核心理念概述">核心理念概述</h2>
+<ol type="1">
+<li>针对挑战1，提出潜在得分（Potential Score）</li>
+<li>针对挑战2，应用蒙特卡洛树搜索（MCTS）算法和层次剪枝策略</li>
+</ol>
+<h3 id="潜在得分">潜在得分</h3>
+<p><strong>思想：根因变化时子代LEAF elements'KPI value也会发生变化，预期变化和实际变化之间的差异即为潜在得分</strong></p>
+<p>潜在得分大于阈值，则被认定为根因</p>
+<h3 id="mcts和层次剪枝">MCTS和层次剪枝</h3>
+<p>采用MCTS是因为其为启发式算法（AlphaGo采用）</p>
+<p><strong>分层剪枝思想：</strong>搜索较低层之后修剪掉较高层中不太可能是根本原因的elements</p>
+<h3 id="整体方法">整体方法</h3>
+<p>MCTS作为基本搜索算法，潜在得分衡量集合与MCTS的value function，层次结构修剪方法减少搜索空间</p>
+<p>由底层到高层，类似于不断确定通配符取值的过程</p>
+<h2 id="hotspot设计">HotSpot设计</h2>
+<h3 id="异常检测和预测">异常检测和预测</h3>
+<p>首先要检测总KPI中的异常——采用一种成熟的方法（均值偏差法？类$ 3$准则？）</p>
+<p>阈值如下： <span class="math display">\[
+T_l=\mu-c\times\sigma\quad T_u=\mu+c\times\sigma
+\]</span> 超出阈值则检测到异常</p>
+<h3 id="潜在得分-1">潜在得分</h3>
+<p>涟漪相应：根因异常按比例沿着层级向LEAF传播（？没看到作用）</p>
+<p>潜在得分：根因占比越大潜在得分越高，作为MCTS的value function，相同得分根因认定父级（模板是谁，谁的值变化，其余不变）</p>
+<h3 id="mcts示例">MCTS示例</h3>
+<p>MCTS为启发式算法，在决策空间抽取随机样本建立搜索树，MCTS会沿着有希望的分支和未开发的分支进行搜索</p>
+<p>节点为状态，A为动作空间{选择Selection，拓展Expansion，评估Evaluation，备份Backup}</p>
+<p>终止搜索的情况：</p>
+<ol type="1">
+<li>发现最佳集合（得分超出阈值）</li>
+<li>搜索完全部节点</li>
+<li>最大迭代次数M（超参数）</li>
+</ol>
+<h3 id="分层修剪">分层修剪</h3>
+<p>逐层搜索，即从第1层到最大层，搜索完低层会删除掉高层中不太可能是根因的元素</p>
+<p><strong>分层剪枝思想：父元素具有非常低的潜在得分，则每个子元素不太可能是根本原因，is very similar to the Apriori Principle in Association Rule Mining（类似关联规则挖掘的先验原则）</strong></p>
+<p>简单来说，分层修剪等于模板淘汰，或者直观而言，只有出现的模板元素才能进行$ 2^n - 1 $组合，有点类似于强制确定通配符</p>
+<h3 id="整体算法">整体算法</h3>
+<ul>
+<li>输入：元素的PV值，潜在得分阈值PT，最大迭代次数</li>
+<li>MCTS找到该层最佳集合</li>
+<li>再进入下一层时进行分层修剪</li>
+<li>重复搜索和修剪过程直至搜索到最佳集合，或潜在得分超出阈值，此时Best集合即为根因</li>
+</ul>
+<h2 id="评估">评估</h2>
+<h3 id="数据">数据</h3>
+<p>真实PV数据的基础上注入异常驱动的数据</p>
+<p>搜索引擎九周数据，最后一周注入异常用作测试，前八周计算平均值和标准差，</p>
+<p>数据量每天108亿条，时间戳粒度为秒，</p>
+<p>操作过程同整体算法部分介绍内容</p>
+<h3 id="注入异常">注入异常</h3>
+<p>原因：真实数据集中异常太少，且不一定能覆盖整个参数空间的异常集</p>
+<p>步骤：</p>
+<ol type="1">
+<li>移动平均法平滑数据</li>
+<li>将高斯噪声添加到平滑后的LEAF元素数据上</li>
+<li>特定元素注入异常，使用涟漪效应将预测值和异常值之间的差异分配给其后代，并添加高斯噪声</li>
+<li>使用Eq.1聚合来获得其他元素PV值</li>
+</ol>
+<h3 id="根因集">根因集</h3>
+<p>虽然HotSpot可以处理n个元素组成的根因集合，但此处限制n最大为5，则共有$ 45=20 $种根因集，平均每种类型的注入400个异常案例</p>
+<h3 id="评价指标">评价指标</h3>
+<p>精度，召回率，F-score</p>
+<p>超参数配置：</p>
+<ul>
+<li>PT阈值为0.99</li>
+<li>M由5至15平衡有效性和效率进行经验上的选择，文章通过F-score的直方图选择M=10</li>
+</ul>
+<h3 id="hotspot的有效性">HotSpot的有效性</h3>
+<p>对比方法：Adtributor和iDice</p>
+<ul>
+<li>Adtributor专注于revenue debugging（收益调试）问题，与HotSpot类似，但只能处理一层长方体中的根因</li>
+<li>iDice为有效属性组合方法，多为属性空间与HotSpot类似，但它是针对根因集较少的情况（根因集只有一到两个元素）定制的，预置三个参数需要通过扫描参数空间得到。iDice基于影响的修剪可能错误修剪掉元素，多元素异常中隔离能力不够好</li>
+</ul>
+<p>无论是F-score还是精度、召回率，HotSpot即表现优异又体现了鲁棒性</p>
+<p>但HotSpot存在遗漏一些异常的根因：</p>
+<ul>
+<li>噪声使得HotSpot不能准确地计算预测值</li>
+<li>阈值可以控制HotSpot的结束以平衡准确性和计算成本，导致遗漏</li>
+</ul>
+<h3 id="hotspot的效率">HotSpot的效率</h3>
+<p>HotSpot，没有MCTS的HotSpot（分层修剪逐层搜索），没有层次修剪的HotSpot（对每一个长方体采用MCTS选择盲集潜在得分最大的作为盲集）进行对比，不考虑完全搜索方法（既不使用MCTS也不使用层次修剪）</p>
+<p>上述数据集进行采样作为小规模的新数据集</p>
+<p>HotSpot效果更好更鲁棒</p>
+<h2 id="运行经验">运行经验</h2>
+<p>简单介绍了两个操作案例（的效果）</p>
+<h2 id="讨论">讨论</h2>
+<p>我们假设异常定位是由异常检测触发，并将异常检测预测值用作输入，但异常检测算法本文未讨论</p>
+<p>涟漪效应具有局限性，不能通过涟漪效应处理的元素应该手动分析，剩下元素使用HotSpot</p>
+<p>MCTS搜索和层次剪枝都是启发式的算法，所以HotSpot不能保证找到全局最优解</p>
+<p>HotSpot可以提供根因的候选排序列表，而不是只能提供一个候选根因</p>
+<h2 id="相关工作">相关工作</h2>
+<p>Pinpoint使用聚类分析诊断根因</p>
+<p>SCORE,Shrink,Shared Risk Link Group（SPLG）定位IP网络故障</p>
+<p>Sherlock在网络元素的依赖性中找出性能问题的根本原因</p>
+<p>Argus从服务提供商的角度检测异常，定位性能不佳的用户，使用的是树状层次化结构</p>
+<p>FOCUS确定多维日志中长期瓶颈</p>
+<p>HotSpot的特点：</p>
+<ul>
+<li>问题集中在多维系统上的细粒度异常定位，系统数据值是可加的</li>
+<li>以往工作存在大量直观经验来化简复杂问题，HotSpot提出创新的基本思想且平衡了效率和效果</li>
+</ul>
+<p>iDice和Adtributor解决了ISP设置中的异常检测和定位问题。对于异常定位，他们只在三个简短的段落中草拟了anidea（应用关联规则算法），而没有足够的算法细节。模型对于不同类型的案例需要不同的参数集，这点难以实现</p>
+<h2 id="论文评价">论文评价</h2>
+<p>这篇文章在阅读时相当费劲，即便上面的笔记也能看出，行文结构过于嵌套和重复，大概这就是IEEE吧，草（日语。实际上算法内容跟上篇相当，能把文章写成这种样子真是不容易，核心理念概述那块就应该直接砍掉，揉进框架设计里。在阅读时，建议先理解长方体数据结构，然后理解问题和算法设计会更加直观，且不重复（预备知识的感觉？）</p>
+<h2 id="q-a">Q &amp; A</h2>
+<ol type="1">
+<li><p>Q：如何通过涟漪效应给出潜在得分？</p>
+<p>A：具体实现应该是通过原始数值比例进行误差的分配</p></li>
+<li><p>Q：蒙特卡洛树是啥，是如何使用的？</p>
+<p>A：蒙特卡洛树是一种启发式算法，本文只是对此算法在应用场景上进行了迁移</p></li>
+<li><p>Q：分层修剪的方法是原创吗？原理和实现过程如何？</p>
+<p>A：是原创，原理为父集合的误差为子集合误差的汇总，删除异常值较小的父集合的全部子集合。（容易造成best集合遗漏吧）</p></li>
+<li><p>Q：多为属性KPI异常定位的现有方法是什么？为何跟HotSpot框架的效果差距悬殊？</p>
+<p>A：现有的方法为Adtributor和iDice。首先，本论文的异常数据是按照涟漪效应注入的，HotSpot框架几乎就是为这种异常定制的。其次，前两种算法本身的问题在实验之前就已经不被看好了。综上，这种比较完全是不对称的，才导致了效果差距悬殊</p></li>
+</ol>
+<h2 id="关键词">关键词</h2>
+<p><strong>多属性KPI异常检测</strong>、<strong>涟漪效应</strong>、<strong>MCTS</strong>、<strong>分层剪枝</strong>、<strong>HotSpot</strong>、<strong>Adtributor</strong>、<strong>iDice</strong></p>
+<h2 id="总结">总结</h2>
+<p><strong>通过涟漪效应分层传递异常总误差，并将误差作为蒙特卡洛树的得分逐层搜索，根据上层的得分决定下层子集是否会被剪枝，最终确定多属性KPI细粒度的异常根因</strong></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/24/ROCKA+CPLE/" rel="next" title="Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams">
+                <i class="fa fa-chevron-left"></i> Rapid Deployment of Anomaly Detection Models for Large Number of Emerging KPI Streams
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="avocador" />
+            
+              <p class="site-author-name" itemprop="name">avocador</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Avocador" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1666752748@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论"><span class="nav-number">2.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#q"><span class="nav-number">3.</span> <span class="nav-text">Q</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#导言"><span class="nav-number">4.</span> <span class="nav-text">导言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题介绍"><span class="nav-number">5.</span> <span class="nav-text">问题介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概念"><span class="nav-number">5.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">5.2.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#挑战"><span class="nav-number">5.3.</span> <span class="nav-text">挑战</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#核心理念概述"><span class="nav-number">6.</span> <span class="nav-text">核心理念概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#潜在得分"><span class="nav-number">6.1.</span> <span class="nav-text">潜在得分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mcts和层次剪枝"><span class="nav-number">6.2.</span> <span class="nav-text">MCTS和层次剪枝</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#整体方法"><span class="nav-number">6.3.</span> <span class="nav-text">整体方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hotspot设计"><span class="nav-number">7.</span> <span class="nav-text">HotSpot设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#异常检测和预测"><span class="nav-number">7.1.</span> <span class="nav-text">异常检测和预测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#潜在得分-1"><span class="nav-number">7.2.</span> <span class="nav-text">潜在得分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mcts示例"><span class="nav-number">7.3.</span> <span class="nav-text">MCTS示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分层修剪"><span class="nav-number">7.4.</span> <span class="nav-text">分层修剪</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#整体算法"><span class="nav-number">7.5.</span> <span class="nav-text">整体算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#评估"><span class="nav-number">8.</span> <span class="nav-text">评估</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据"><span class="nav-number">8.1.</span> <span class="nav-text">数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注入异常"><span class="nav-number">8.2.</span> <span class="nav-text">注入异常</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根因集"><span class="nav-number">8.3.</span> <span class="nav-text">根因集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#评价指标"><span class="nav-number">8.4.</span> <span class="nav-text">评价指标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hotspot的有效性"><span class="nav-number">8.5.</span> <span class="nav-text">HotSpot的有效性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hotspot的效率"><span class="nav-number">8.6.</span> <span class="nav-text">HotSpot的效率</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行经验"><span class="nav-number">9.</span> <span class="nav-text">运行经验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#讨论"><span class="nav-number">10.</span> <span class="nav-text">讨论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关工作"><span class="nav-number">11.</span> <span class="nav-text">相关工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#论文评价"><span class="nav-number">12.</span> <span class="nav-text">论文评价</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#q-a"><span class="nav-number">13.</span> <span class="nav-text">Q &amp; A</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关键词"><span class="nav-number">14.</span> <span class="nav-text">关键词</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">15.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">avocador</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
