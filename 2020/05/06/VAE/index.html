@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/cloud.jpg?v=5.1.4" color="#222">
+
+
+  <link rel="manifest" href="/images/manifest.json">
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引发Variational Autoencoders,VAEs变分自编码器技术 生成模型：学习数据生成过程。高维到低维Encoder（data到隐变量），低维到高维Decoder（隐变量到输出） 朴素贝叶斯 思想：极大化后验概率（的分子） 实质：将实例各特征取值在类别中的概率进行汇总（i.i.d假设） 流程：  计算先验概率及条件概率 \[ \begin{align} &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Auto-encoding Variational Bayes">
+<meta property="og:url" content="http://yoursite.com/2020/05/06/VAE/index.html">
+<meta property="og:site_name" content="avocador&#39;s blog">
+<meta property="og:description" content="引发Variational Autoencoders,VAEs变分自编码器技术 生成模型：学习数据生成过程。高维到低维Encoder（data到隐变量），低维到高维Decoder（隐变量到输出） 朴素贝叶斯 思想：极大化后验概率（的分子） 实质：将实例各特征取值在类别中的概率进行汇总（i.i.d假设） 流程：  计算先验概率及条件概率 \[ \begin{align} &amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1588053443/blog/VAE_1_mhoxtv.png">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1588053443/blog/VAE_2_nsrphn.png">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1588053444/blog/VAE_3_jsgjl2.png">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1588053443/blog/VAE_4_ik3vur.png">
+<meta property="article:published_time" content="2020-05-06T01:08:05.503Z">
+<meta property="article:modified_time" content="2020-05-06T01:08:05.504Z">
+<meta property="article:author" content="avocador">
+<meta property="article:tag" content="����ѧϰ">
+<meta property="article:tag" content="���Ļ���">
+<meta property="article:tag" content="����ʼ�">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/avocador/image/upload/v1588053443/blog/VAE_1_mhoxtv.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/06/VAE/"/>
+
+
+
+
+
+  <title>Auto-encoding Variational Bayes | avocador's blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">avocador's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/06/VAE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="avocador">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="avocador's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Auto-encoding Variational Bayes</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-06T09:08:05+08:00">
+                2020-05-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>引发Variational Autoencoders,VAEs变分自编码器技术</p>
+<p>生成模型：学习数据生成过程。高维到低维Encoder（data到隐变量），低维到高维Decoder（隐变量到输出）</p>
+<h2 id="朴素贝叶斯">朴素贝叶斯</h2>
+<p>思想：极大化后验概率（的分子）</p>
+<p><strong>实质：将实例各特征取值在类别中的概率进行汇总（i.i.d假设）</strong></p>
+<p><strong>流程：</strong></p>
+<ol type="1">
+<li><p>计算先验概率及条件概率 <span class="math display">\[
+\begin{align}
+&amp; p(Y=c_k)=\frac{\sum_{i=1}^N I(y_i=c_k)}{N} \\
+&amp;\text{类$c_k$在全局的概率}  \\
+&amp; p(X^{(j)}=a_{jl}|Y=c_k)=\frac{\sum_{i=1}^N I(x_i^{(j)}=a_{jl},y_i=c_k)}{\sum_{i=1}^N I(y_i=c_i)} \\ 
+&amp;\text{特征j取值为$a_{jl}$在类$c_k$中的概率} \\
+\end{align}
+\]</span></p></li>
+<li><p>计算实例与各类的联合概率（后验概率的分子） <span class="math display">\[
+\begin{align}
+ &amp; p(X^{(1)}=x^{(1)},\cdots,X^{(n)}=x^{(n)},Y=c_k)
+\\ = &amp; p(Y=c_k)\prod_{j=1}^n p(X^{(j)}=x^{(j)}|Y=c_k)
+\end{align}
+\]</span></p></li>
+<li><p>确定实例的类 <span class="math display">\[
+y=\mathop{\arg\max_{c_k}}P(X^{(1)}=x^{(1)},\cdots,X^{(n)}=x^{(n)},Y=c_k)
+\]</span></p></li>
+</ol>
+<p><strong>改进：平滑，解决输入中无该类导致先验概率为0；类别中无该特征取值导致条件概率为0的问题</strong> <span class="math display">\[
+\begin{align}
+&amp; p(Y=c_k)=\frac{\sum_{i=1}^N I(y_i=c_k)+\lambda}{N+K\lambda} \\
+&amp; p(X^{(j)}=a_{jl}|Y=c_k)=\frac{\sum_{i=1}^N I(x_i^{(j)}=a_{jl},y_i=c_k)+\lambda}{\sum_{i=1}^N I(y_i=c_i)+S_j\lambda} \\
+&amp; 其中\lambda \geq 0,K为类别的数量,S_j为特征j的取值的数量
+\end{align}
+\]</span></p>
+<hr />
+<h2 id="摘要">摘要</h2>
+<p>在定向概率模型中引入随机变分推理算法</p>
+<ol type="1">
+<li>证明了变分下界的下限估计且可以通过标准随机梯度方法优化</li>
+<li>实验，数据为i.i.d且每个数据点具有连续潜变量</li>
+</ol>
+<h2 id="结论">结论</h2>
+<p>引入新的变分下界估计，变分贝叶斯随机梯度（SGVB）用于连续潜变量的有效近似推断，可以用标准随机梯度方法优化。i.i.d连续潜变量数据中整体方法被称为变分贝叶斯自动编码（AEVB）</p>
+<h2 id="q">Q</h2>
+<ol type="1">
+<li>定向概率模型是什么？文章究竟是在研究什么？</li>
+<li>变分贝叶斯随机梯度法是如何工作的？</li>
+<li>整个模型的效果如何？</li>
+<li>由这篇文章引出的VAE是什么</li>
+</ol>
+<h2 id="引言">引言</h2>
+<p>变分贝叶斯（VB）方法无法处理后验分布，常见的平均场无法很好地近似后验分布。而随机梯度变分贝叶斯（SGVB）求解简单可微分无偏估计。对于i.i.d情景，提出变分贝叶斯自动编码（AEVB）算法，即由SGVB估计器完成后验推断，学习模型参数。而非迭代处理方案(MCMC)</p>
+<h2 id="方法">方法</h2>
+<p>假设：数据独立同分布且每个数据点具有潜在变量</p>
+<p>目标：对全局参数进行最大似然（ML）或最大后验（MAP）推断，对潜在变量进行变分推断。且可以由静态数据推广至非静态数据（流数据），文章采用固定数据集。</p>
+<h3 id="实际问题">实际问题</h3>
+<p>情景：i.i.d数据由连续潜在变量随机生成过程</p>
+<ol type="1">
+<li>确定潜在变量值$ p_(Z)=z^{(i)} $</li>
+<li>由条件分布$ p_(X|Z) 生成 x^{(i)} $</li>
+</ol>
+<p>问题：无法确定参数$ 和潜在变量值 z^{(i)} $</p>
+<ol type="1">
+<li>边际似然度积分$ p_(X)=p_(Z)p_(X|Z) ,{}x $难以处理</li>
+<li>批量优化成本太高，基于少量甚至单点进行参数更新</li>
+</ol>
+<p>需求：</p>
+<ol type="1">
+<li>参数$ $的有效近似ML或MAP估计</li>
+<li>给定观察值，可以有效近似潜在变量</li>
+<li>有效推断边际似然度积分</li>
+</ol>
+<p>方案：引入识别模型$ q_(Z|X) ，其参数 将与生成模型参数 $一起被学习</p>
+<p>从编码理论角度，潜在变量即编码的价值，识别模型$ q_(Z|X) 称为概率编码器，p_theta(X|Z) $称为概率解码器</p>
+<h3 id="变分界">变分界</h3>
+<p><strong>补充知识：KL散度（相对熵）</strong></p>
+<p>Entropy熵：p为观测的概率分布 <span class="math display">\[
+H=-\sum_{i=1}^N p(x_i)\log p(x_i)
+\]</span> KL散度：p为观测的概率分布，q为p的近似分布 <span class="math display">\[
+\begin{align}
+D_{KL}(p||q)
+&amp; =\sum_{i=1}^Np(x_i)(\log p(x_i)-\log q(x_i)) \\
+&amp; =\sum_{i=1}^N p(x_i)\log \frac{p(x_i)}{q(x_i)} \\
+&amp; =E[\log p(x)-\log q(x)]
+\end{align}
+\]</span> KL散度为数据原始分布和近似分布之间的对数差值的期望，表示信息损失程度</p>
+<p>KL散度并非距离，其不满足对称性。即p近似q和q近似p二者损失的信息不一样</p>
+<p>KL散度具有非负性：-log为convex凸函数，$ E(f(x)) &gt;= f(E(x)) $ <span class="math display">\[
+\begin{align}
+D_{KL}(p||q)
+&amp; =E[\log p(x)-\log q(x)] \\
+&amp; =E[\log \frac{p(x)}{q(x)}] \\
+&amp; =E[-\log \frac{q(x)}{p(x)}] \\
+&amp; \geq -\log [E(\frac{q(x)}{p(x)})] \\
+&amp; =-\log[\sum_{i=1}^N p(x_i)\frac{q(x_i)}{p(x_i)}] \\
+&amp; =-\log(\sum_{i=1}^N q(x_i)) \\
+&amp; =0
+\end{align}
+\]</span></p>
+<hr />
+<p>边际似然度： <span class="math display">\[
+\log p_\theta(X^{(1)},\cdots,X^{(N)})=\sum_{i=1}^N\log p_\theta(X^{(i)})
+\]</span> 其中： <span class="math display">\[
+\log p_\theta(X^{(i)})=D_{KL}(q_\phi(Z|X)||p_\theta(Z|X))+L(\theta,
+\phi;X)
+\]</span> 近似后验与真实后验的KL散度： <span class="math display">\[
+\begin{align}
+D_{KL}(q_\phi (Z|X)||p_\theta (Z|X))
+&amp;=E_{q_\phi(Z|X)}[\log q_\phi (Z|X)-\log p_\theta (Z|X)] \\
+&amp;=E_{q_\phi(Z|X)}[\log q_\phi (Z|X)-\log p_\theta (X,Z)]+\log p_\theta(X)
+\end{align}
+\]</span> KL散度非负，故第二项称为边际似然（变分）下界： <span class="math display">\[
+\begin{align}
+L(\theta,\phi;X)
+&amp;=E_{q_\phi(Z|X)}[-\log q_\phi(Z|X)+\log p_\theta(X,Z)]\\
+&amp;=-D_{KL}(q_\phi(Z|X)||p_\theta(Z))+E_{q_\phi(Z|X)}[\log p_\theta(X|Z)]
+\end{align}
+\]</span> 计算不含后验概率，通过最大化边际似然下界学习参数</p>
+<p>采用蒙特卡洛梯度： <span class="math display">\[
+\begin{align}
+\nabla_\phi E_{q_\phi(Z)}[f(Z)]
+&amp;=E_{q_\phi(Z)}[f(Z)\nabla_{q_\phi(Z)}\log q_\phi(Z)] \\
+&amp;\approx \frac{1}{L}\sum_{l=1}^Lf(Z)\nabla_{q_\phi(Z^{(l)})}\log q_\phi(Z^{(l)}) &amp; 其中Z^{(l)}\sim q_\phi(Z|X^{(i)})
+\end{align}
+\]</span> 但梯度估计器方差过大，且与需求不相符</p>
+<h3 id="sgvb">SGVB</h3>
+<p>参数重构： <span class="math display">\[
+z=g_\phi(\varepsilon,x) \\
+其中g是参数为\phi的二元函数,\varepsilon \sim p(\varepsilon),对\varepsilon采样\varepsilon^{(l)}则可得到z^{(i,l)}=g_\phi(\varepsilon^{(l)},x^{(i)})
+\]</span> 蒙特卡洛对期望的估计： <span class="math display">\[
+E_{q_\phi(Z|X^{(i)})}[f(Z)]=E_{p(\varepsilon)}[f(g_\phi(\varepsilon,X^{(i)}))] \approx \frac{1}{L}\sum_{l=1}^Lf(g_\phi(\varepsilon^{(l)},X^{(i)}))
+\]</span></p>
+<p>变分下界的通用随机梯度变分贝叶斯（SGVB）估计量： <span class="math display">\[
+\hat{L}^A(\theta,\phi;X^{(i)})=\frac{1}{L}\sum_{l=1}^L\log p_\theta(X^{(i)},Z^{(i,l)})-\log q_\phi(Z^{(i,l)}|X^{(i)})
+\]</span></p>
+<p>变分下界的散度随机梯度变分贝叶斯（SGVB）估计量： <span class="math display">\[
+\hat{L}^B(\theta,\phi;X^{(i)})=-D_{KL}(q_\phi(Z|X^{(i)})||p_\theta(Z))+\frac{1}{L}\sum_{l=1}^L\log p_\theta(X^{(i)}|Z^{(i,l)})
+\]</span> <strong>最小化近似与真实后验分布即正则项，最大化后者即重构误差（重构图像与输入图像尽量相同）</strong></p>
+<p>N个给定数据，小批量取值为M时的边际似然下界估计： <span class="math display">\[
+L(\theta,\phi;X)\approx \hat L^M(\theta,\phi;X^M)=\frac{N}{M}\sum_{i=1}^M\hat L(\theta,\phi;X^{(i)})
+\]</span> 当batch size足够大时，L可以取1</p>
+<h3 id="重新参数化">重新参数化</h3>
+<p>使得蒙特卡洛估计的期望可微的辅助变量：</p>
+<ol type="1">
+<li>可逆Cumulative Distribution Function（CDF）分布函数</li>
+<li>location-scale（含有尺度参数和位置参数）分布族标准化</li>
+<li>随机变量分布的变换</li>
+</ol>
+<p>$ p(Z) <span class="math inline">\(一般直接选用均值为0，方差为1的高斯分布\)</span> N(0,1) $</p>
+<h2 id="变分自动编码器vae实例">变分自动编码器（VAE）实例</h2>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1588053443/blog/VAE_1_mhoxtv.png" /></p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1588053443/blog/VAE_2_nsrphn.png" /></p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1588053444/blog/VAE_3_jsgjl2.png" /></p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1588053443/blog/VAE_4_ik3vur.png" /></p>
+<h2 id="相关工作">相关工作</h2>
+<p>采用近似真实后验的识别模型——wake-sleep algorithm [HDFN95]算法</p>
+<p>缺点：需要同时优化两个目标函数，但不等于对边际似然的优化</p>
+<p>优点：既适用于连续潜在变量模型也适用于离散潜在变量模型，与AEVB复杂度相同</p>
+<p>其他算法不适用实验场景</p>
+<h2 id="实验">实验</h2>
+<ul>
+<li><p>在MNIST和Frey Face图像数据集上进行AEVB与wake-sleep算法比较，收敛速度更快，达到更好的解决效果</p></li>
+<li><p>在MNIST数据集上对AEVB、wake-sleep方法、MCEM（蒙特卡洛EM法）的收敛速度进行比较</p>
+<p>MCEM缺点：不是在线算法，不能应用于完整的MNIST数据集</p></li>
+</ul>
+<h2 id="未来工作">未来工作</h2>
+<ul>
+<li>深度神经网络的分成生成架构</li>
+<li>时间序列模型（动态贝叶斯网络）</li>
+<li>将SGVB应用于全局参数</li>
+<li>学习潜在变量监督模型的噪声分布</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/06/ExCause/" rel="next" title="CAUSAL ANALYSIS OF THE UNSATISFYING EXPERIENCE IN REALTI MEMOBILE MULTIPLAYER GAMES IN THE WILD">
+                <i class="fa fa-chevron-left"></i> CAUSAL ANALYSIS OF THE UNSATISFYING EXPERIENCE IN REALTI MEMOBILE MULTIPLAYER GAMES IN THE WILD
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="avocador" />
+            
+              <p class="site-author-name" itemprop="name">avocador</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Avocador" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1666752748@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#朴素贝叶斯"><span class="nav-number">1.</span> <span class="nav-text">朴素贝叶斯</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">2.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论"><span class="nav-number">3.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#q"><span class="nav-number">4.</span> <span class="nav-text">Q</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">5.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方法"><span class="nav-number">6.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实际问题"><span class="nav-number">6.1.</span> <span class="nav-text">实际问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#变分界"><span class="nav-number">6.2.</span> <span class="nav-text">变分界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sgvb"><span class="nav-number">6.3.</span> <span class="nav-text">SGVB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重新参数化"><span class="nav-number">6.4.</span> <span class="nav-text">重新参数化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变分自动编码器vae实例"><span class="nav-number">7.</span> <span class="nav-text">变分自动编码器（VAE）实例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关工作"><span class="nav-number">8.</span> <span class="nav-text">相关工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实验"><span class="nav-number">9.</span> <span class="nav-text">实验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#未来工作"><span class="nav-number">10.</span> <span class="nav-text">未来工作</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">avocador</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

@@ -81,15 +81,15 @@
 
 
 
-<meta name="description" content="README 《推荐系统实践》一书共八个章节，核心章节为第二至六章，文章展开遵循推荐系统架构搭建的具体步骤：选择算法（第二章），处理冷启动问题（第三章），将用户标签、上下文信息和社交网络数据用于算法优化（分别对应第四、五、六章）。 值得注意的是，作者在第二章介绍了三种设计推荐算法的思想，共计四种具体算法。笔记并未按照作者的思路同时搭建四种具体算法的架构，而是分别对各算法的实现进行梳理，依次为：">
+<meta name="description" content="摘要 野外多人实时交互手机游戏（RMMGs）影响因素 1200万真实游戏会话，13%位置重新同步，7.12%在游戏结束前被异常中止 提出因果分析框架ExCause获得原因，调整QoE，位置重新同步次数减少95.1%，平均1.323次减少到0.065次 结论 首创应用场景，定量说明位置再同步和异常退出为普遍现象 提出ExCause获得原因，调整QoE，给出了位置重新同步方面的建议，纠正基">
 <meta property="og:type" content="article">
-<meta property="og:title" content="推荐系统实践笔记_00">
-<meta property="og:url" content="http://yoursite.com/2020/04/17/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0_00/index.html">
+<meta property="og:title" content="CAUSAL ANALYSIS OF THE UNSATISFYING EXPERIENCE IN REALTI MEMOBILE MULTIPLAYER GAMES IN THE WILD">
+<meta property="og:url" content="http://yoursite.com/2020/05/06/ExCause/index.html">
 <meta property="og:site_name" content="avocador&#39;s blog">
-<meta property="og:description" content="README 《推荐系统实践》一书共八个章节，核心章节为第二至六章，文章展开遵循推荐系统架构搭建的具体步骤：选择算法（第二章），处理冷启动问题（第三章），将用户标签、上下文信息和社交网络数据用于算法优化（分别对应第四、五、六章）。 值得注意的是，作者在第二章介绍了三种设计推荐算法的思想，共计四种具体算法。笔记并未按照作者的思路同时搭建四种具体算法的架构，而是分别对各算法的实现进行梳理，依次为：">
+<meta property="og:description" content="摘要 野外多人实时交互手机游戏（RMMGs）影响因素 1200万真实游戏会话，13%位置重新同步，7.12%在游戏结束前被异常中止 提出因果分析框架ExCause获得原因，调整QoE，位置重新同步次数减少95.1%，平均1.323次减少到0.065次 结论 首创应用场景，定量说明位置再同步和异常退出为普遍现象 提出ExCause获得原因，调整QoE，给出了位置重新同步方面的建议，纠正基">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-04-17T04:17:41.958Z">
-<meta property="article:modified_time" content="2020-04-25T10:16:05.702Z">
+<meta property="article:published_time" content="2020-05-06T01:01:53.887Z">
+<meta property="article:modified_time" content="2020-05-06T01:01:53.888Z">
 <meta property="article:author" content="avocador">
 <meta property="article:tag" content="����ѧϰ">
 <meta property="article:tag" content="���Ļ���">
@@ -124,13 +124,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/04/17/推荐系统实践笔记_00/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/05/06/ExCause/"/>
 
 
 
 
 
-  <title>推荐系统实践笔记_00 | avocador's blog</title>
+  <title>CAUSAL ANALYSIS OF THE UNSATISFYING EXPERIENCE IN REALTI MEMOBILE MULTIPLAYER GAMES IN THE WILD | avocador's blog</title>
   
 
 
@@ -237,7 +237,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/17/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0_00/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/06/ExCause/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="avocador">
@@ -254,7 +254,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">推荐系统实践笔记_00</h1>
+          <h1 class="post-title" itemprop="name headline">CAUSAL ANALYSIS OF THE UNSATISFYING EXPERIENCE IN REALTI MEMOBILE MULTIPLAYER GAMES IN THE WILD</h1>
         
 
         <div class="post-meta">
@@ -266,8 +266,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-17T12:17:41+08:00">
-                2020-04-17
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-06T09:01:53+08:00">
+                2020-05-06
               </time>
             
 
@@ -289,8 +289,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Notes/" itemprop="url" rel="index">
-                    <span itemprop="name">Notes</span>
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
                   </a>
                 </span>
 
@@ -326,12 +326,120 @@
       
 
       
-        <h1 id="readme">README</h1>
-<p>《推荐系统实践》一书共八个章节，核心章节为第二至六章，文章展开遵循推荐系统架构搭建的具体步骤：选择算法（第二章），处理冷启动问题（第三章），将用户标签、上下文信息和社交网络数据用于算法优化（分别对应第四、五、六章）。</p>
-<p>值得注意的是，作者在第二章介绍了三种设计推荐算法的思想，共计四种具体算法。笔记并未按照作者的思路同时搭建四种具体算法的架构，而是分别对各算法的实现进行梳理，依次为：基于用户的协同过滤算法，基于物品的协同过滤算法，隐语义算法和基于图的算法。如果涉及算法间的比较，通常将该部分置于后梳理笔记之中。</p>
-<p>非核心章节将独立以章节名进行内容梳理。</p>
-<p>关于推荐系统的感想和疑问将会另建笔记整理。</p>
-<p>感谢您可以抽出时间阅读《README》，希望这部分内容对你有所价值。</p>
+        <h2 id="摘要">摘要</h2>
+<p>野外多人实时交互手机游戏（RMMGs）影响因素</p>
+<p>1200万真实游戏会话，13%位置重新同步，7.12%在游戏结束前被异常中止</p>
+<p>提出因果分析框架ExCause获得原因，调整QoE，位置重新同步次数减少95.1%，平均1.323次减少到0.065次</p>
+<h2 id="结论">结论</h2>
+<p>首创应用场景，定量说明位置再同步和异常退出为普遍现象</p>
+<p>提出ExCause获得原因，调整QoE，给出了位置重新同步方面的建议，纠正基于相关性研究中的误解</p>
+<h2 id="q">Q</h2>
+<ol type="1">
+<li>模型应用场景是怎样，如何解读这些概念？</li>
+<li>因果分析框架是如何搭建和使用的？</li>
+<li>位置重新同步指标是如何通过框架计算的？模型是否可迁移？</li>
+</ol>
+<h2 id="引言">引言</h2>
+<p>手游占主导，RMMG（多人在线手游）类型游戏（虚荣、神秘传奇）比较受欢迎，第一人称射击（FPS）占据美国游戏销量25.9%</p>
+<p><strong>贡献1</strong></p>
+<p>QoE（quality of experience）游戏体验：</p>
+<ul>
+<li>LRC位置重新同步次数，LR指玩家角色被游戏强迫从游戏客户端的一个状态/位置瞬间“跳转”到另一个状态/位置</li>
+<li>AQ是否异常退出会话，游戏客户端超时或玩家强退</li>
+</ul>
+<p>1200万交互中，13%的游戏会话至少一次LR，7.12%的游戏会话AQs</p>
+<p><strong>贡献2</strong></p>
+<p>概念辨析：</p>
+<ul>
+<li>因果关系：在相同条件下A的改变将导致B改变</li>
+<li>相关关系：A和B一起改变（可能是共同原因C）</li>
+</ul>
+<p>ExCause将可调因素视作原因，不可调整因素视为混杂条件</p>
+<p><strong>贡献3</strong></p>
+<p>ExCause的建议有效</p>
+<p>本文结论有：</p>
+<ul>
+<li>调整安卓版本可以使LRC平均降低95.1%，从1.323降至0.065</li>
+<li>操作系统版本和像素密度是导致QoE不令人满意的首要原因，而不是接入网络类型（以往都认为是首要原因，体现了框架选用因果分析而非相关性分析的必要性）</li>
+</ul>
+<p><strong>文章架构</strong></p>
+<ul>
+<li>第2节：介绍QoE指标和（可调整与不可调整的）原因</li>
+<li>第3节：介绍ExCause的框架</li>
+<li>第4节：显示结果</li>
+<li>第5节：相关工作</li>
+<li>第6节：结论</li>
+</ul>
+<p><font color="#dd0000">实验不存在比较，设计略微简单</font></p>
+<h2 id="qoe指标与原因">QoE指标与原因</h2>
+<p>QoE指标</p>
+<p><strong>游戏会话：</strong></p>
+<ol type="1">
+<li>远程服务器维护每个玩家的状态（例如虚拟世界中的位置/姿势/动作），基于游戏逻辑进行计算，并将最新信息发给玩家</li>
+<li>每个客户端从远程服务器接收信息，更新游戏状态，呈现新的游戏视频，并将用户动作发送给远程服务器</li>
+</ol>
+<p>LR：卡顿，游戏客户端画面跳转，以便与服务器状态同步</p>
+<p>AQ：强退，玩家在游戏结束之前退出游戏会话（不是正常退出客户端），AQ可能影响队友QoE（游戏运行商扣积分）</p>
+<p><strong>数据：</strong></p>
+<p>FPS游戏，QoE信息和协商因素（互联网服务提供商，操作系统版本），12亿场比赛的1%（1200万条记录）</p>
+<p><strong>可调整因素：</strong></p>
+<ol type="1">
+<li>TAN：固定流量或者wifi</li>
+<li>IQ：调变和解调的精确度，IQ信号（越大渲染图像能力越强）</li>
+<li>PD：屏幕密度对应分辨率，安卓可设置，IOS不行。五个层次LDPI（240），HDPI（480），XHDPI（720），XXHDPI（1080）</li>
+<li>OSV：操作系统版本，可更换</li>
+<li>ISP：网络服务供应商，双卡或者不变更电话号码更换网络服务供应商</li>
+</ol>
+<h2 id="excause框架">ExCause框架</h2>
+<p><strong>ExCause：</strong></p>
+<ol type="1">
+<li>识别QoE不令人满意的关键集</li>
+<li>基于因果分析提出建议</li>
+</ol>
+<p>上下文因素组合（模板），根据安卓和IOS操作系统划分游戏会话</p>
+<p><strong>因果分析：</strong></p>
+<p>对照实验不可行</p>
+<p>使用潜在结果框架Potential Outcome Frame-work（POF）定位关键集合的因素</p>
+<p>首次从社会和生物医学界迁移到手机游戏分析</p>
+<p><strong>因果分析的两个假设：</strong></p>
+<ol type="1">
+<li>SUTVA：个体处理稳定性假设，个体的潜在结果不随其他个体是否接受处理而改变</li>
+<li>unconfoundedness：非混淆假设，分配机制独立于潜在结果</li>
+</ol>
+<p><strong>参数：</strong> <span class="math display">\[
+\begin{align}
+&amp; 实验组Z_i=1，对照组Z_i=0，平均实验效果ATE无偏估计 \\
+&amp; 潜在结果 Y_i(1)或Y_i(0) \\
+&amp; 倾向得分 e(X_i)=P(Z_i=1|X_i) \\
+&amp; 本质上是X_i降维的结果，逻辑回归可知Z_i \bot \lbrace Y_i(1),Y_i(0) \rbrace | e(X_i) \\
+&amp; 逆概率加权法估计ATE（游戏会话全部从对照组转移到实验组的效果）和ATC（对照组中平均实验效果） \\
+\end{align}
+\]</span> 关键组即对照组，只更改其中一个属性取值作为实验组。</p>
+<p>ATC的估计量用来评估每个实验组的潜在QoE改进效果</p>
+<p>除了可调整的因素，不可调整的因素也会对实验产生影响，作为干扰因子（混杂因子），其他未被观察到的因素不包括在干扰因子里（特别说明）</p>
+<h2 id="实验结果">实验结果</h2>
+<p>粗体，对于40个安卓设备，推荐的更改因子是OSV，它可以将LRC从1.327减少95.1%到0.069</p>
+<p>结论：</p>
+<ul>
+<li><p>OSV（操作系统版本）是五个可调整因素中最频繁的建议</p></li>
+<li><p>第二个是安卓用户的PD（屏幕密度即分辨率）</p></li>
+<li><p>一二表明客户端设备因素是影响游戏体验的罪魁祸首</p>
+<p><font color="#dd0000">还用得着你说？？？</font></p></li>
+<li><p>最佳设置效果，安卓（IOS）的LRC平均分数可以从1.301（2.66）降至0.089（0.19）</p>
+<p>安卓（IOS）的AQ比率从7.5%降低82.6%至1.3%（从22.5%降低36.8%至14.22%）</p>
+<p><font color="#dd0000"> 啥情况？？?单看指标也不是安卓设置最低啊，咋指标吊打苹果了</font></p></li>
+<li><p>属性取值对评估指标的影响是符合常理的（特别的，降低OSV是因为低端设备操作系统版本过高，因果分析的必要）</p></li>
+</ul>
+<h2 id="相关工作">相关工作</h2>
+<p><strong>QoE：</strong></p>
+<ul>
+<li>使用帧等待时间性能研究手游QoE（玩家可能观察不到）</li>
+<li>使用肯德尔相关性和信息增益来量化潜在关系和QoE指标（相关性还不够，因果分析是有必要的）</li>
+</ul>
+<p><strong>因果分析：</strong></p>
+<ul>
+<li>使用精确匹配的混杂因子方法来构造具有相似混杂因子分布的对照数据集和实验数据集，但会丢弃不能精确匹配任何一个数据集中混杂因子的样本，偏差不能避免（本文方法可以做到估计原始混杂分布下的效果比对）</li>
+</ul>
 
       
     </div>
@@ -356,8 +464,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/04/09/%E6%9C%80%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/" rel="next" title="最优化方法">
-                <i class="fa fa-chevron-left"></i> 最优化方法
+              <a href="/2020/04/25/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0_02/" rel="next" title="推荐系统实践笔记_02">
+                <i class="fa fa-chevron-left"></i> 推荐系统实践笔记_02
               </a>
             
           </div>
@@ -366,8 +474,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/04/18/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0_01/" rel="prev" title="推荐系统实践笔记_01">
-                推荐系统实践笔记_01 <i class="fa fa-chevron-right"></i>
+              <a href="/2020/05/06/VAE/" rel="prev" title="Auto-encoding Variational Bayes">
+                Auto-encoding Variational Bayes <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -511,7 +619,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#readme"><span class="nav-number">1.</span> <span class="nav-text">README</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论"><span class="nav-number">2.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#q"><span class="nav-number">3.</span> <span class="nav-text">Q</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">4.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#qoe指标与原因"><span class="nav-number">5.</span> <span class="nav-text">QoE指标与原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#excause框架"><span class="nav-number">6.</span> <span class="nav-text">ExCause框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实验结果"><span class="nav-number">7.</span> <span class="nav-text">实验结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关工作"><span class="nav-number">8.</span> <span class="nav-text">相关工作</span></a></li></ol></div>
             
 
           </div>
