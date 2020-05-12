@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/cloud.jpg?v=5.1.4" color="#222">
+
+
+  <link rel="manifest" href="/images/manifest.json">
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="摘要 使用场景：微服务结构 MS-Rank：  构建影响图 随机游走 结果准确度计算 指标权重更新  首先，将基本指标和隐含指标引入MS-Rank，设计影响图发现异常期间服务之间的因果关系 其次，提出向前、自身、向后的启发式随机游走算法定位根因 第三，建立自我优化机制，根据诊断准确性更新指标的权重 开发原型系统将MS-Rank集成到IBM Cloud，实验表明MS-Rank">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MS-Rank 动态微服务随机游走根因定位">
+<meta property="og:url" content="http://yoursite.com/2020/05/12/MS-Rank/index.html">
+<meta property="og:site_name" content="avocador&#39;s blog">
+<meta property="og:description" content="摘要 使用场景：微服务结构 MS-Rank：  构建影响图 随机游走 结果准确度计算 指标权重更新  首先，将基本指标和隐含指标引入MS-Rank，设计影响图发现异常期间服务之间的因果关系 其次，提出向前、自身、向后的启发式随机游走算法定位根因 第三，建立自我优化机制，根据诊断准确性更新指标的权重 开发原型系统将MS-Rank集成到IBM Cloud，实验表明MS-Rank">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_1_mdyef0.gif">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_2_htdfhz.gif">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_3_lwisia.gif">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_4_ko8mwm.gif">
+<meta property="article:published_time" content="2020-05-12T03:48:31.071Z">
+<meta property="article:modified_time" content="2020-05-12T03:50:07.628Z">
+<meta property="article:author" content="avocador">
+<meta property="article:tag" content="����ѧϰ">
+<meta property="article:tag" content="���Ļ���">
+<meta property="article:tag" content="����ʼ�">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_1_mdyef0.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/12/MS-Rank/"/>
+
+
+
+
+
+  <title>MS-Rank 动态微服务随机游走根因定位 | avocador's blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">avocador's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-categories"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/12/MS-Rank/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="avocador">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="avocador's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MS-Rank 动态微服务随机游走根因定位</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-12T11:48:31+08:00">
+                2020-05-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要">摘要</h2>
+<p>使用场景：微服务结构</p>
+<p>MS-Rank：</p>
+<ol type="1">
+<li>构建影响图</li>
+<li>随机游走</li>
+<li>结果准确度计算</li>
+<li>指标权重更新</li>
+</ol>
+<p>首先，将基本指标和隐含指标引入MS-Rank，设计影响图发现异常期间服务之间的因果关系</p>
+<p>其次，提出向前、自身、向后的启发式随机游走算法定位根因</p>
+<p>第三，建立自我优化机制，根据诊断准确性更新指标的权重</p>
+<p>开发原型系统将MS-Rank集成到IBM Cloud，实验表明MS-Rank具有快速识别和精确诊断的效果，且可以有效自我优化</p>
+<h2 id="结论">结论</h2>
+<p>MS-Rank：应用于微服务体系结构的多指标自适应根因诊断框架</p>
+<p>精度方面优于其他方法，并且可以快速识别根本原因，具有高度自适应性，适用于其他复杂网络的快速异常诊断</p>
+<h2 id="引言">引言</h2>
+<p>微服务框架：细粒度的自治服务来开发、部署和维护软件应用程序</p>
+<p>每个服务独立运行并通过Web API进行通信，基于单个服务质量（QoE）指标的算法在异常检测中失效（复杂系统）</p>
+<p>MS-Rank的贡献：</p>
+<ol type="1">
+<li>引入基本指标和隐含指标，构建影响图构造算法发现异常期间服务之间的因果关系</li>
+<li>提出基于随机游走的向前、自身、向后的启发式根因定位算法</li>
+<li>建立自我优化机制，根据诊断准确性动态更新不同指标的权重</li>
+</ol>
+<p>实验：开发一个原型，将MS-Rank引入IBM Cloud。快速精确，无需先验知识，可与专家经验相结合。</p>
+<h2 id="相关工作">相关工作</h2>
+<p>微服务框架之前：网络流量分析，Web服务异常检测</p>
+<p>复杂网络系统中根因定位：阈值，决策树，贝叶斯网络，聚类，马尔可夫预测模型和机器学习</p>
+<p>最近的工作通常集中在基于性能指标和系统拓扑的知识挖掘上，通常需要中央代理从分布式监视工具中收集度量标准，这些方法大多需要先验知识，例如拓扑，传输层数据流或服务调用关系，影响了模型的普适性。</p>
+<p>通过系统配置文件，启发式方法识别异常：Invariant graph描述异常传播，静态网络结构中可靠但微服务更动态</p>
+<p>因果发现算法获得动态服务依赖性：Microscope（使用并行的PC算法基于单个度量构建因果关系图，利用条件图遍历算法定位根因）和Sieve（使用Granger Causality获得服务组件之间的依赖关系，依靠网络流量数据的收集来帮助他们构建服务依赖性，但收集数据需要额外的成本）</p>
+<p>从常规分层网络的数据包和日志收集多个度量标准：NetMedic、Sherlock、SherLog、Gestalt、LOUD，但微服务框架会产生更高的维度和动态依赖性</p>
+<p>MS-Rank：微服务动态根因定位，不需要先验知识，并且能够自动处理微服务系统中的多种度量</p>
+<h2 id="问题陈述">问题陈述</h2>
+<h3 id="背景">背景</h3>
+<p>服务缺陷有时会导致微服务构架中的系统异常：主机资源有限，硬件可用性，网络不稳定等</p>
+<p>微服务指标收集机制：复杂系统（研究的服务太多，度量标准不同），异常会沿其调用拓扑传播并最终导致系统崩溃</p>
+<h3 id="假设">假设</h3>
+<p>将微服务架构视为黑匣子，假设无先验知识（调用拓扑，服务机能），因此不依赖于收集不同服务之间的通信数据包的任何模块，即该假设保证了模型的普适性。该模型也可引入先验知识，并证明了其有效性。</p>
+<h2 id="解决方案">解决方案</h2>
+<h3 id="ms-rank诊断框架">MS-Rank诊断框架</h3>
+<p>手动诊断过程中倾向于根据服务的特性选择某种度量标准来进行故障排除。尽管服务调用依赖关系变化很快，但微服务的功能相对稳定</p>
+<p>研究思路：并非为服务指定特定的度量标准，而是设计了一种自适应机制（MS-Rank）来更新度量的权重并根据需要动态选择它们进行诊断。整体结构分为四个阶段</p>
+<p>MS-Rank是一个在线自适应框架：通过因果分析从指标中提取服务之间的影响图，基于影响图和服务指标权重执行随机游走诊断算法定位根因。借助SRE可以验证结果准确性促进权重更新</p>
+<h3 id="基本指标和隐含指标">基本指标和隐含指标</h3>
+<p>由于微服务的多样性，不同服务的异常表现出不同的特征。因此单一度量标准无法完全反映异常的特征，为了描述细粒度的功能，将基本指标和隐含指标引入MS-Rank <span class="math display">\[
+M(v_{i},\ t)=\{M_{1}(v_{i},\ t),\ M_{2}(v_{i},\ t),\ \cdots\,\ M_{m}(v_{i},\ t)\}, i\in[1,n]
+\]</span> 基本指标：延迟，吞吐量，CPU负载，RAM。磁盘I/O，power（吞吐量/延迟），可用性（服务可用时间百分比），其他（根据异常特征选择的指标）</p>
+<p>隐含变量：</p>
+<ul>
+<li><p>梯度，梯度比和拉普拉斯算子：评估和反映给定时间间隔中度量的趋势，可用于识别特定的峰值并消除偏倚 <span class="math display">\[
+\begin{equation*}
+\left.\begin{matrix}
+\nabla_{j,i}(t)=M_{j,i}(t)-M_{j,i}(t-1)\\
+\nabla_{j,i}^{r}(t)=\nabla_{j,i}(t)/M_{j,i}(t)\\
+\triangle_{j,i}\ (t)=\nabla_{j,i}^{2}(t)=\nabla_{j,i}(t)-\nabla_{j,i}(t-1)
+\end{matrix}\right\}\forall t\in[t_{start},\ t_{end}]
+\end{equation*}
+\]</span></p></li>
+<li><p>均值和标准差：描述基本度量的统计特征，通过汇总原始测量值和滑动窗口计算，可用于消除不反映真的的呼叫依存关系的琐碎波动。（合理窗口大小应该为呼叫间隔的统计平均值） $$ Sw= _{i=1}^{n})(interval of calling v_i) \</p>
+<p><span class="math display">\[\begin{equation*}
+\left.\begin{matrix}
+\overline\nabla_{j,i}(t)=\frac{1}{w}(\Sigma_{tk=t}^{t+w}\nabla_{j,i}(t_{k}))\\
+\mathrm{S}_{ji}^{\nabla}(t)=\sqrt{\frac{1}{w-1}\Sigma_{t_{k}=t}^{t+w}(\nabla_{j,i}(t)-\overline\nabla_{j,i}(t_{k}))^{2}}\end{matrix}\right \}\forall t_{k}\in sw
+\end{equation*}\]</span> $$</p></li>
+<li><p>到本地的最大和最小距离：从当前测量值到其本地最大和最小记录的距离（与最值之差） <span class="math display">\[
+\begin{equation*}
+\left.\begin{matrix}
+d_{\max}(M_{j,i}(t))=\max\{\forall M_{j,i}(t_{k})\}-M_{ji}(t)\\
+d_{\min}(M_{j,i}(t))=M_{j,i}(t)-\min\{\forall M_{ji}(t_{k})\}\end{matrix}\right \} \forall t_{k}\in sw
+\end{equation*}
+\]</span></p></li>
+</ul>
+<h3 id="构造多指标影响图">构造多指标影响图</h3>
+<p>由于异常传播相关的调用关系随事件的不同而不同，因此提取影响关系并根据基本指标和隐含指标构建复合影响图</p>
+<p>构造算法灵感来自Peter-Clark算法工作</p>
+<p>复合影响图是描述顶点（服务）之间的影响关系的加权CPDAG（完整的部分有向无环图）</p>
+<p>跟传统的呼叫依赖性发现方法相比，该方法消除了与异常无关的依赖性，留下更少的诊断目标</p>
+<ol type="1">
+<li>构建完整的无向图</li>
+<li>利用G检验P值进行条件独立性检验，移除无向边</li>
+<li>验证V结构</li>
+<li>利用两个原则验证剩余的无向边和任何方向（不创建循环，不创建新的V结构）</li>
+</ol>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_1_mdyef0.gif" /></p>
+<p><strong>例子：</strong></p>
+<p>四个微服务API的延迟度量构造影响图</p>
+<p>应用程序仪表板，控制台，事件组件，AI自然语言分类器</p>
+<p>观察结果：控制台和事件组件API具有持续的高延迟，落后仪表板28分钟。观察到其他异常之前，AI模块的等待时间已大大增加。无法通过观察准确描述异常的性质。</p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_2_htdfhz.gif" /></p>
+<p><strong>把握住条件概率和边缘的概念就可以理顺影响图的构建</strong></p>
+<p><strong>计算复杂度：</strong></p>
+<p>对每种度量创建单独的图，而不是考虑多个度量之间的相互关系（算法复杂度指数增长）</p>
+<p>条件独立测试的数量上界： <span class="math display">\[
+2m\left(\begin{array}{cc} n_{i} \\ k_{i}\end{array} \right) \sum\nolimits_{j=0}^{k_{i}}\left(\begin{array}{cc} n_{i}-1\\ j\end{array} \right)
+\]</span></p>
+<h3 id="多指标随机游动诊断">多指标随机游动诊断</h3>
+<p>识别服务根本原因的直观方法为计算其指标和前端服务中观察到的异常之间的相似度</p>
+<p>MS-Rank在服务之间的多个指标上引入相关函数，用来评估它们的综合相似性，相关性取值为[0,1]</p>
+<p>定义多指标置信度权重矩阵，反映不同指标对服务的置信度（初始值为1/m）</p>
+<p>构造复合相关函数来度量两个指标之间的依赖关系： <span class="math display">\[
+\begin{equation*}
+[C]_{i,j}=c_{i,j}=\sum_{k=1}^{m}w_{i,k}\left\vert\frac{\sum_{q=1}^{t}([M_k]_{i,q}-\overline{[M_k]})([M_k]_{j,q}-\overline{[M_k]}_j)}{\sqrt{\sum_{q=1}^{t}([M_k]_{i,q}-\overline{[M_k]})^2}\sqrt{\sum_{q=1}^{t}([M_k]_{j,q}-\overline{[M_k]}_j)^2}}\right\vert
+\end{equation*}
+\]</span> 该相关函数是Pearson相关的加权绝对值，因为异常传播中同时存在正相关和负相关。</p>
+<p>服务间相关性的复杂性和动态性，很难计算多个度量沿着网络的传播特性，基于相似度的搜索方法通常无法找到根本原因，所以设计了三种随机游走方法，forward，selfward，backward</p>
+<p><strong>向前过渡</strong></p>
+<p>访问概率与相关性成正比，构造前向过度概率矩阵： <span class="math display">\[
+\begin{equation*}
+[\mathrm{P}]_{i,j}=p_{i,j}=\sum_{k=1}^{m}w_{i,k}\frac{c_{j,fe}}{\sum_{l\in O_{k}},c_{l,fe}}, \forall e_{ij}\in G_{k}, e_{i,j}=1, k\in[1,\ m]
+\end{equation*}
+\]</span> <strong>自身停留</strong></p>
+<p>当与邻居没有高度相关性的时候，将更多的时间停留在当前的访问服务上（由跟邻居之间最大转移概率有关） <span class="math display">\[
+\begin{equation*}
+p_{i}^{s}=\max (0,pi,i-\max_{l\in Ik\cup O_{k}},\ p_{i,l}), k\in[1,\ m]
+\end{equation*}
+\]</span> <strong>向后过渡</strong></p>
+<p>当访问相关性比较低的服务时，如果领域都与异常相关性较低，则无法逃脱出错误路线</p>
+<p>向后过渡可以找到更多路线，使随机游走更具启发性 <span class="math display">\[
+\begin{equation*}
+p_{i,j}^{b}=\rho\frac{p_{i,j}}{\sum_{l\in I_{k,i}}p_{i,l}}, k\in[1,m]
+\end{equation*}
+\]</span> p为向后过渡常数，表示前向约束强度。p小，则更向前，p大则更加灵活（向前向后）</p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_3_lwisia.gif" /></p>
+<h3 id="结果精度和权重更新">结果精度和权重更新</h3>
+<p>为了量化每个指标的置信度，设计指标的诊断精度函数。精度越高代表根因定位更准确。 <span class="math display">\[
+\begin{equation*}
+\mathrm{P}(M)=\frac{1}{k}\sum_{k=1}^{\vert R[n]\vert }\frac{1}{\vert A\vert }\sum_{a\in A}\frac{\Sigma_{i\leq k}R[i]\in v_{rc}}{\min(k,\vert v_{rc}\vert)}
+\end{equation*}
+\]</span> 为了自动计算不同指标的权重，设计了一种自动优化机制，可以为具有更高结果精度的指标的服务分配更高的权重 <span class="math display">\[
+\begin{equation*}
+w_{i,k}= \mathrm{P}(M_{k})/\sum_{j=1}^{m}\mathrm{P}(M_{j}), v_{i}\in v_{rc}
+\end{equation*}
+\]</span> <img src="https://res.cloudinary.com/avocador/image/upload/v1589254946/blog/MS-Rank_4_ko8mwm.gif" /></p>
+<p>自动化模型：</p>
+<ol type="1">
+<li>计算复合相关</li>
+<li>构造影响图，根据过渡概率函数进行随机游走调查</li>
+<li>计算结果精度，更新置信矩阵</li>
+</ol>
+<p>因此MS-Rank可以通过动态选择更多合适的指标组合来进行自身调整</p>
+<p><strong>例子：</strong></p>
+<p>IBM Cloud中典型事件，使用总时间间隔为7200秒的数据集运行MS-Rank，每5秒记录一次指标，每种记录都有1440条记录。选择占主导地位的指标（权重最高的指标）来表示边缘的类型，它表示哪个指标最有效地分析这种影响关系。此事件的根本原因是几个事件处理组件的内存不足，在云中传播，导致控制台变慢，最终冻结了仪表板。</p>
+<h2 id="实验与评估">实验与评估</h2>
+<h3 id="测试平台和基准">测试平台和基准</h3>
+<p>测试平台：将MS-Rank集成到IBM Cloud中，使用从IBM Cloud SRE团队收集的内部报告事件来验证MS-Rank并于选定的基准进行比较。原始日志系统仅记录每个请求调用的API，即数据集不包括API与特定微服务之间的从属关系。因此将不同的API视作独立的服务。</p>
+<p>数据大小：事件发生的2小时内，从1732个微服务API收集的每种度量标准大约1500万条记录（手动定位根因约3小时）</p>
+<p>基准：random selection，TBAC，MonitorRank，NetMedic和Gestalt</p>
+<ul>
+<li>random selection：随机顺序调查根本原因的直接方法</li>
+<li>TBAC：非启发式方法，致力于异常度量的相关性，使用一系列基于依赖关系图的加权等级进行改进</li>
+<li>MonitorRank：基于预定义系统拓扑和单个指标的启发式算法</li>
+<li>NetMedic和Gestalt：常规分层网络设计的静态多指标方法</li>
+</ul>
+<p>算法指标：top-k精度，avg-k精度（平均精度）</p>
+<h3 id="实验和结果分析">实验和结果分析</h3>
+<p>第一个实验——算法精度</p>
+<p>Random和TBAC，MonitorRank的延迟和吞吐量以及NetMedic，Gestalt和MS-Rank的多个指标来比较结果精度</p>
+<p>10轮诊断和优化的结果精度</p>
+<p>MS-Rank的准确性最高，跟静态解决方案（NetMedic和Gestalt）相比，随机游走诊断算法可以更好地发现微服务体系结构的根本原因</p>
+<p>第二个实验——自适应性</p>
+<p>MS-Rank和NetMedic相比（经过10测试），MS-Rank精度稳定，结果偏差随着多轮实验而减小（优化趋于稳定）</p>
+<h3 id="具有领域知识的ms-rank">具有领域知识的MS-Rank</h3>
+<p>根据领域知识的五个方面修改影响图：</p>
+<ol type="1">
+<li>来自同一源/目录的链接服务API（API）</li>
+<li>链接已知的调用关系（Linked）</li>
+<li>定向已知的方向（Direction）</li>
+<li>删除常规服务（Normal）</li>
+<li>删除没有依赖性的边（Unlinked）</li>
+</ol>
+<p>数据集稀疏时，将领域知识引入影响图比删除更有用，添加调用关系更显著地提高结果精度。完整数据集时，数据中发现的知识足够进行启发式诊断，与稀疏数据集环境相比，改进并不明显</p>
+<h3 id="算法成本">算法成本</h3>
+<p>MS-Rank复杂度主要受两个因素影响：</p>
+<ul>
+<li>数据集间隔（数据集越长需要计算的条件独立性测试就越多）</li>
+<li>条件独立性测试P值的阈值（阈值越大保留的边缘数据越多），线性增加</li>
+</ul>
+<p>构建影响图时间占主导，根因定位时间只占总时间的小部分</p>
+<h3 id="参数间隔">参数间隔</h3>
+<p>MS-Rank中输入更多指标，结果将更准备地反映服务之间的影响关系并有助于根因定位。</p>
+<p>随着间隔的增加，精度会急剧提高，因为从指标中发现了更多的关联</p>
+<h3 id="参数">参数</h3>
+<p><strong>阈值</strong></p>
+<p>数据集稀疏时，较高的阈值更准确，因为数据集没有足够的度量反映相关性（边缘数量太小无法确保可访问性）</p>
+<p>处理完整数据时，冗余边缘会影响转移的准确性，阈值不能过大</p>
+<p><strong>后向参数</strong></p>
+<p>后向参数较小，需要较高的阈值参数以确保更多路径，增加后向参数游走更灵活（默认值0.2）</p>
+<hr />
+<hr />
+<h2 id="阅读感受">阅读感受</h2>
+<p>指标全连接</p>
+<p>指标间的相关性——&gt;删减边</p>
+<p>V结构——&gt;确定连接单向</p>
+<p>通过与异常的相似度随机游走</p>
+<p>定位成根因由三部分组成：停留，被指引（前向），被返回（后向）</p>
+<p>最终停留指标被定义成根因</p>
+<p>这种方法将异常在指标之间传播的过程具象化，影响图的工作实际上是减少计算量，按照随机游走的思路不需要拓扑调用链实际上影响不大。相关性阈值和后向参数一定程度上缓解了模型过拟合，可以尝试动态调整。</p>
+<p>根因定位中启发式的算法，多为根因定位和蒙特卡罗搜索。利用的都是大量随机下的稳定趋势。虽然该模型此部分并不消耗时间（相对于构造影响图而言），但如果能采用分层式搜索，在处理多指标的时候应该可以更快速（可能损失准确性）</p>
+<p>至于影响图的构造，本意还是减少随机游走路径。现实应用场景中为何会出现无法拓扑调用链的情况呢？另外，除了通过指标数据构造调用链，也应当有其他简便方式拓扑，例如注入异常？（类似于DNA标记），当然，相似度的模型具有普适性（往往牺牲准确性）</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/06/VAE/" rel="next" title="Auto-encoding Variational Bayes">
+                <i class="fa fa-chevron-left"></i> Auto-encoding Variational Bayes
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="avocador" />
+            
+              <p class="site-author-name" itemprop="name">avocador</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Avocador" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1666752748@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论"><span class="nav-number">2.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">3.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关工作"><span class="nav-number">4.</span> <span class="nav-text">相关工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题陈述"><span class="nav-number">5.</span> <span class="nav-text">问题陈述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景"><span class="nav-number">5.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#假设"><span class="nav-number">5.2.</span> <span class="nav-text">假设</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">6.</span> <span class="nav-text">解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ms-rank诊断框架"><span class="nav-number">6.1.</span> <span class="nav-text">MS-Rank诊断框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本指标和隐含指标"><span class="nav-number">6.2.</span> <span class="nav-text">基本指标和隐含指标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构造多指标影响图"><span class="nav-number">6.3.</span> <span class="nav-text">构造多指标影响图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多指标随机游动诊断"><span class="nav-number">6.4.</span> <span class="nav-text">多指标随机游动诊断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结果精度和权重更新"><span class="nav-number">6.5.</span> <span class="nav-text">结果精度和权重更新</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实验与评估"><span class="nav-number">7.</span> <span class="nav-text">实验与评估</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#测试平台和基准"><span class="nav-number">7.1.</span> <span class="nav-text">测试平台和基准</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验和结果分析"><span class="nav-number">7.2.</span> <span class="nav-text">实验和结果分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具有领域知识的ms-rank"><span class="nav-number">7.3.</span> <span class="nav-text">具有领域知识的MS-Rank</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#算法成本"><span class="nav-number">7.4.</span> <span class="nav-text">算法成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参数间隔"><span class="nav-number">7.5.</span> <span class="nav-text">参数间隔</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参数"><span class="nav-number">7.6.</span> <span class="nav-text">参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阅读感受"><span class="nav-number">8.</span> <span class="nav-text">阅读感受</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">avocador</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
