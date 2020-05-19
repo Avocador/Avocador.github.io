@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cloud.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/cloud.jpg?v=5.1.4" color="#222">
+
+
+  <link rel="manifest" href="/images/manifest.json">
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="大规模异常检测中关键绩效指标的鲁棒快速聚类 摘要： KPIs表现为固定时间间隔流数据，实质为时间序列。 时间序列聚类研究大多为低维时间序列（不存在异常）的聚类方法和相似性测量 ROCKA目标：具有异常和噪声（改变KPIs形状）的高维（因为要考量周期性、季节性）时间序列数据进行聚类 ROCKA流程：  预处理：KPIs归一化，消除幅度差异 基线提取：ROCKA提取KPI基础形状，称为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ROCKA">
+<meta property="og:url" content="http://yoursite.com/2020/05/19/ROCKA/index.html">
+<meta property="og:site_name" content="avocador&#39;s blog">
+<meta property="og:description" content="大规模异常检测中关键绩效指标的鲁棒快速聚类 摘要： KPIs表现为固定时间间隔流数据，实质为时间序列。 时间序列聚类研究大多为低维时间序列（不存在异常）的聚类方法和相似性测量 ROCKA目标：具有异常和噪声（改变KPIs形状）的高维（因为要考量周期性、季节性）时间序列数据进行聚类 ROCKA流程：  预处理：KPIs归一化，消除幅度差异 基线提取：ROCKA提取KPI基础形状，称为">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/avocador/image/upload/v1589858057/blog/ROCKA_1_hdak6m.png">
+<meta property="article:published_time" content="2020-05-19T07:01:48.276Z">
+<meta property="article:modified_time" content="2020-05-19T07:01:48.277Z">
+<meta property="article:author" content="avocador">
+<meta property="article:tag" content="����ѧϰ">
+<meta property="article:tag" content="���Ļ���">
+<meta property="article:tag" content="����ʼ�">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/avocador/image/upload/v1589858057/blog/ROCKA_1_hdak6m.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/19/ROCKA/"/>
+
+
+
+
+
+  <title>ROCKA | avocador's blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">avocador's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-categories"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/19/ROCKA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="avocador">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="avocador's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ROCKA</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-19T15:01:48+08:00">
+                2020-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Paper/" itemprop="url" rel="index">
+                    <span itemprop="name">Paper</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>大规模异常检测中关键绩效指标的鲁棒快速聚类</p>
+<h2 id="摘要">摘要：</h2>
+<p>KPIs表现为固定时间间隔流数据，实质为时间序列。</p>
+<p>时间序列聚类研究大多为低维时间序列（不存在异常）的聚类方法和相似性测量</p>
+<p>ROCKA目标：具有异常和噪声（改变KPIs形状）的高维（因为要考量周期性、季节性）时间序列数据进行聚类</p>
+<p>ROCKA流程：</p>
+<ol type="1">
+<li><strong>预处理：</strong>KPIs归一化，消除幅度差异</li>
+<li><strong>基线提取：</strong>ROCKA提取KPI基础形状，称为baseline（距离度量为SBD，故具有鲁棒性）</li>
+<li><strong>聚类：</strong>使用基于密度的算法，根据基线的形状相似性创建聚类</li>
+<li><strong>赋值：</strong>聚类质心为新KPI</li>
+</ol>
+<p>ROCKA效果：F-score高于0.85，优于目前最先进的聚类算法（YADING），（ROCKA+DONUT+KPI特定阈值）将最先进的异常检测算法（DONUT）节省90%训练时间，仅损失15%性能</p>
+<h2 id="总结">总结</h2>
+<p>ROCKA：一种稳健快速的高维KPI时间序列聚类算法</p>
+<p>比较算法：DONUT，ROCKA+DONUT，ROCKA+DONUT+KPI特定阈值（主要体现了KPI阈值的重要性）</p>
+<h2 id="文章初评">文章初评</h2>
+<p>文章认为KPI应该根据数据的形状进行聚类，即根据数据变化趋势聚类，让变化节奏一致的KPIs用新KPI表示</p>
+<p>这种假设性相当的强，应用场景的KPI指标是否具有这种性质是需要检验的。模型选择通过归一化消除（弱化）部分噪声和异常，因此拟合的是正常状态下的指标变化，这种状态的相似性不见得可以推广到异常发生期间，如何拟合异常时期KPIs的变化趋势以及研究这种趋势在异常检测（和根因定位）场景中的应用可以作为一个课题</p>
+<p>模型的性能实际上在实验之前可以预测出来，聚类使得DONUT计算复杂度大幅减少，相应，细节的变化趋势无法被检测</p>
+<p>如何选择基线，SBD距离，将是文章的主要贡献</p>
+<p>如果是对趋势进行聚类的话，循环神经网络（尤其是LSTM+attention）是否会得到更好的效果呢？</p>
+<h2 id="引言">引言</h2>
+<p>大多数异常检测算法针对每个KPI都需要一个单独模型：Oppren-tice，EDAGS，DONUT</p>
+<p>许多KPIs因其隐含的联系和相似性而相似，基于相似性来识别同类KPI（该类第一个算法）</p>
+<h2 id="概述">概述</h2>
+<h3 id="kpi场景">KPI场景</h3>
+<ul>
+<li>噪声和异常：噪声为小的随机波动，异常为显著波动（通常大于2个标准差），会扭曲指标相似性<font color='red'> 异常标签数据的标签如何利用，可以研究</font></li>
+<li>振幅差异：KPI不同尺度导致振幅不同 <font color='red'> 消除量纲不是目的，目的在于保存趋势，是否可以引入非线性或者非线性会带来什么影响</font></li>
+<li>相移：存在明确或隐含关联的KPIs存在时间延迟<font color='red'> 相移可以引申到截取及截取后同根指标影响如何对应也值得研究</font></li>
+<li>高维度，高数据量：实际上也是降维的理由，即放弃部分异常检测精度，减少时间代价</li>
+</ul>
+<p>以上对于KPI场景特殊性的阐述是普适的，即这些问题普遍存在。在算法迁移的过程中应当根据这些特点进行调整，甚至继续研究。鲁棒性，实质上应当看作模型对于这些特点的敏感性</p>
+<h3 id="rocka">ROCKA</h3>
+<ol type="1">
+<li>预处理：消除幅度差异并标准化数据</li>
+<li>基线提取：减少噪声，消除极值（可能是异常）</li>
+<li>聚类：针对相移和噪声具有鲁棒性</li>
+<li>通过质心划分其他KPI</li>
+</ol>
+<p>9000个时间序列数据，其中2000用以聚类</p>
+<h2 id="算法">算法</h2>
+<h3 id="预处理">预处理</h3>
+<p>缺失值：因为数量少，故采用线性插值，即相邻数据点填充</p>
+<p>标准化：标准正态归一化（消除幅度差异，便于相似度计算）</p>
+<h3 id="基线提取">基线提取</h3>
+<p>平滑极值：删除与平均值偏差最大的前5%数据，使用线性插值法填充（消除异常，相邻点代替不会太改变KPI基本形状）</p>
+<p>提取基准：提取粗糙的基线来代表每个KPI（消除噪声），简单有效的方法是KPI上小滑动窗口取移动平均（传统时间序列处理方法）</p>
+<h3 id="基于密度聚类">基于密度聚类</h3>
+<p>相似性度量：</p>
+<ul>
+<li>Lp范数：对噪声，幅度差异和相移敏感</li>
+<li>DTW（Dynamic Time Warping）对相移，缩放失真和其他形状变化保持不变性，但具有很高的计算复杂度</li>
+<li>correlation-based metrics：信号处理方式，可以处理相移，并且通过卷积定理和快速傅里叶变换降低计算复杂度</li>
+<li>shape-based distance（SBD）：两组时间序列数据内积表示相似性称为互相关，内积最大值表示最佳位移（相移便是通过这种方式消除）。较小的逐点相似性度量SBD表示较高的相似度</li>
+</ul>
+<p>聚类算法：</p>
+<ul>
+<li>分区方法（Partitioning methods）：例如K-Means和K-medoids（超参数为聚类数，受初始分区影响）</li>
+<li>基于特征和模型（Feature-and model-based methods）：高斯混合模型，ARIMA（将时间序列转换成特征）</li>
+<li>基于密度（Density-based methods）：DBSCAN（密度即单位区域内数量）</li>
+</ul>
+<p>本文采用DBSCAN（基于密度的聚类算法），不必给出聚类数，形状相似度可以传递（基于对称性）。该算法主要思想为一个簇在密度半径的距离内至少有确定数量的对象，故超参数为对象数量阈值和密度半径。对于密度半径的优化设计了一种启发式算法，即左右两侧的曲线斜率是否小于阈值（阈值为超参数），以此调整聚类结果。DBSCAN的计算复杂度为O(nlog(n))。</p>
+<p>通过未参与聚类KPI与聚类质心的SBD距离划分归属的簇（并确定其中离群KPI，即无法归类已知质心的KPI）</p>
+<p>ROCKA的总时间复杂度为O(Nmlog(m)+n2mlog(m)+nlog(n)).</p>
+<h2 id="实验">实验</h2>
+<p>对比算法：YADING和YADING'</p>
+<p>值得注意的是，公开数据集上，模型的评价指标选用的是NMI（Normalized Mutual Information），衡量真实标签和获得簇之间的依赖性。文章数据集上采用的是F-score。文章还展示了基线提取效果，不同相似性度量效果及聚类方法的效果，表明文章中对于各部分的选择是最优的。</p>
+<h2 id="应用">应用</h2>
+<p>与DONUT结合进行异常检测（聚类为异常检测的一种准备）</p>
+<p>必然减少训练时间，损失部分精度，实验结果和预测效果一致</p>
+<h2 id="例题">例题</h2>
+<p>该部分采用例题的形式，对于SBD距离（个人理解为含有相移的距离度量）的解释</p>
+<p><img src="https://res.cloudinary.com/avocador/image/upload/v1589858057/blog/ROCKA_1_hdak6m.png" /></p>
+<table>
+<thead>
+<tr class="header">
+<th>x</th>
+<th>y</th>
+<th>s</th>
+<th>m</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>[1,2,3,4]</td>
+<td>[5,6,7,8]</td>
+<td>-2,0,2</td>
+<td>数据量=4</td>
+</tr>
+</tbody>
+</table>
+<p>分别计算s=-2，s=0，s=2时含相移的内积 $$ <span class="math display">\[\begin{align}
+CC_{-2}(\overrightarrow x ,\overrightarrow y)
+&amp; = \sum_{i=1}^{4+(-2)}x_i*y_{i-(-2)} \\
+&amp; = x_1 * y_3 + x_2 * y_4 \\
+&amp; = 7 + 16 \\
+&amp; = 23 \\
+
+CC_{0}(\overrightarrow x ,\overrightarrow y)
+&amp; = \sum_{i=1}^{4-0}x_{0+i}*y_i \\
+&amp; = x_1 * y_1 + x_2 * y_2 + x_3 * y_3 + x_4 * y_4 \\
+&amp; = 5 + 12 + 21 + 32 \\
+&amp; = 70 \\
+
+CC_{2}(\overrightarrow x ,\overrightarrow y)
+&amp; = \sum_{i=1}^{4-2}x_{2+i}*y_i \\
+&amp; = x_3 * y_1 + x_4 * y_2 \\
+&amp; = 15 +24 \\
+&amp; = 39
+
+\end{align}\]</span> <span class="math display">\[
+通过计算不难发现如下结论
+\]</span> <span class="math display">\[\begin{align}
+&amp; CC_{-2}(\overrightarrow x ,\overrightarrow y)=[x_1,x_2,x_3,x_4]*[y_{1-(-2)}=y_3, y_{2-(-2)}=y_m=y_4),0,0]^T=x_1 * y_3 +x_2 * y_4 \\
+&amp;s&lt;0时，即x的前部与y的后部的内积（模仿相移的逆过程） \\
+&amp;CC_{0}(\overrightarrow x ,\overrightarrow y)=[x_1,x_2,x_3,x_4]*[y_1, y_2, y_3, y_4]^T = x_1 * y_1 + x_2 * y_2 + x_3 * y_3 + x_4 * y_4 \\
+&amp;s=0时，默认x与y之间不存在相移，所以直接内积 \\
+&amp; CC_{2}(\overrightarrow x ,\overrightarrow y)=[x_1,x_2,x_3,x_4]*[0,0,y_1,y_2=y_{4-2}=y_{m-s}]^T = x_3 * y_1 + x_4 * y_2\\
+&amp; s&gt;0时，即x的后部与y的前部的内积（模仿相移的i过程）
+\end{align}\]</span> $$</p>
+<p>相似性度量即为： <span class="math display">\[
+\frac{\overrightarrow x 和\overrightarrow y 所有可能相移的内积}{||\overrightarrow x||_2*||\overrightarrow y||_2} \in [-1, 1]
+\]</span> 类似于协方差阵，以内积作为相似性指标，此处的创新即为引入相移，但内积部分尚可改进</p>
+<p>SBD距离：则通过1-相似性即可描述，取值范围为[0,2]</p>
+<h2 id="文章再评">文章再评</h2>
+<p>文章选用的相似性度量（SBD）和聚类方法（DBSCAN）都是成熟的技术，本文更像是对DONUT算法的改进（预处理），所以在实际应用中，相似性度量和聚类方法的选择应当更加灵活，使得聚类效果更适应我们采用的异常检测算法。</p>
+<p>由于聚类并不涉及异常检测，聚类提供的是非异常状态下指标的时序趋势（用作与现实时序数据进行对比），所以自然舍弃了异常及可能异常的波动。但模型存在大量超参数，对于参数调优是一种挑战。</p>
+<p>另外，如何记录异常状态非异常的时序趋势，与异常的时序趋势，并以何种方式利用是可以继续研究的</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/16/ML-KNN/" rel="next" title="ML-KNN">
+                <i class="fa fa-chevron-left"></i> ML-KNN
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="avocador" />
+            
+              <p class="site-author-name" itemprop="name">avocador</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Avocador" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1666752748@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文章初评"><span class="nav-number">3.</span> <span class="nav-text">文章初评</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">4.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">5.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kpi场景"><span class="nav-number">5.1.</span> <span class="nav-text">KPI场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rocka"><span class="nav-number">5.2.</span> <span class="nav-text">ROCKA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#算法"><span class="nav-number">6.</span> <span class="nav-text">算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#预处理"><span class="nav-number">6.1.</span> <span class="nav-text">预处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基线提取"><span class="nav-number">6.2.</span> <span class="nav-text">基线提取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于密度聚类"><span class="nav-number">6.3.</span> <span class="nav-text">基于密度聚类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实验"><span class="nav-number">7.</span> <span class="nav-text">实验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用"><span class="nav-number">8.</span> <span class="nav-text">应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#例题"><span class="nav-number">9.</span> <span class="nav-text">例题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文章再评"><span class="nav-number">10.</span> <span class="nav-text">文章再评</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-[object Object]"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">avocador</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
